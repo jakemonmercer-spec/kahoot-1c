@@ -2,19 +2,14 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1C: Kahoot PRO</title>
-    
-    <!-- Heavy Styles -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>1C: Kahoot Auto-Pilot</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
-
-    <!-- Firebase SDK Libraries (Compat) -->
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
 
     <script>
-        // ТВОЙ КОНФИГ ПРЯМО В ЯДРЕ
         const firebaseConfig = {
             apiKey: "AIzaSyBrPKRi5NWA7JRcdbA2YLO4HPR3ULaBlGk",
             authDomain: "quiz1c.firebaseapp.com",
@@ -25,67 +20,72 @@
             appId: "1:660786627580:web:6a552159559d0eef426879",
             measurementId: "G-JYTEXXW2BD"
         };
-
-        // Инициализация базы ПЕРЕД загрузкой остального
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
     </script>
 </head>
 <body>
 
-    <!-- ВЕРХНЯЯ ПАНЕЛЬ АДМИНА (Всегда доступна тебе) -->
-    <div id="admin-bar">
-        <div id="lock-zone">
-            <input type="password" id="pass" placeholder="Admin Pass">
-            <button onclick="login()">Login</button>
+    <nav id="admin-bar">
+        <div id="auth-zone">
+            <input type="password" id="adm-pass" placeholder="Pass">
+            <button onclick="authAdmin()">Login</button>
         </div>
-        <div id="controls" style="display:none;">
-            <button class="adm-btn s-run" onclick="sendState('running')">START GAME</button>
-            <button class="adm-btn s-stop" onclick="sendState('stopped')">STOP (Leaderboard)</button>
-            <button class="adm-btn s-reset" onclick="hardReset()">RESET SYSTEM</button>
-            <div id="q-nav"></div>
+        <div id="adm-ctrl" style="display:none;">
+            <button class="a-btn" onclick="setStep('lobby')">ОТКРЫТЬ ЛОББИ</button>
+            <button class="a-btn start" onclick="startAutoQuiz()">ЗАПУСТИТЬ АВТО-КВИЗ</button>
+            <button class="a-btn" onclick="systemReset()">СБРОС</button>
         </div>
-    </div>
+    </nav>
 
-    <div id="main-ui">
+    <div id="stage">
+        <!-- ОЖИДАНИЕ -->
+        <section id="view-wait" class="view active">
+            <div class="k-logo">1C: QUIZ</div>
+            <div class="loader">Ожидание преподавателя...</div>
+        </section>
+
         <!-- ЛОББИ -->
-        <section id="lobby-view" class="v-active">
-            <div class="k-logo">1C: Quiz</div>
-            <div id="wait-msg">Ожидание команды преподавателя...</div>
-            <div id="join-card" style="display:none;">
-                <input type="text" id="nick" placeholder="Введите ваш Nickname">
-                <button class="enter-btn" onclick="playerJoin()">ПРИСОЕДИНИТЬСЯ</button>
+        <section id="view-lobby" class="view">
+            <div id="join-ui">
+                <div class="card">
+                    <h2>Входи в игру!</h2>
+                    <input type="text" id="player-nick" placeholder="Твой ник">
+                    <button class="btn-primary" onclick="join()">ИГРАТЬ</button>
+                </div>
             </div>
-            <div class="live-players">
-                <h3>Студенты в сети:</h3>
-                <div id="player-chips"></div>
+            <div id="lobby-players"></div>
+        </section>
+
+        <!-- ИГРА -->
+        <section id="view-game" class="view">
+            <div class="q-box"><h1 id="q-text">...</h1></div>
+            <div class="timer-bar"><div id="timer-fill"></div></div>
+            <div class="game-info">
+                <div class="t-val" id="timer-sec">20</div>
+                <div id="ans-stat">0 Answers</div>
+            </div>
+            <div class="grid" id="ans-grid">
+                <button class="ans-btn r" onclick="hit(0)"><span class="s">▲</span><span class="t"></span></button>
+                <button class="ans-btn b" onclick="hit(1)"><span class="s">◆</span><span class="t"></span></button>
+                <button class="ans-btn y" onclick="hit(2)"><span class="s">●</span><span class="t"></span></button>
+                <button class="ans-btn g" onclick="hit(3)"><span class="s">■</span><span class="t"></span></button>
             </div>
         </section>
 
-        <!-- ИГРОВОЕ ПОЛЕ -->
-        <section id="game-view" style="display:none;">
-            <div class="q-header"><h1 id="q-title">Вопрос загружается...</h1></div>
-            <div class="g-mid">
-                <div class="t-circle"><span id="t-left">20</span></div>
-                <div class="g-img"><img src="https://1c.ru/images/logos/1c_eng.png"></div>
-                <div class="ans-stat"><div id="ans-num">0</div><span>Answers</span></div>
-            </div>
-            <div class="k-grid">
-                <button class="k-btn r" onclick="ans(0)"><span class="s">▲</span><span class="t"></span></button>
-                <button class="k-btn b" onclick="ans(1)"><span class="s">◆</span><span class="t"></span></button>
-                <button class="k-btn y" onclick="ans(2)"><span class="s">●</span><span class="t"></span></button>
-                <button class="k-btn g" onclick="ans(3)"><span class="s">■</span><span class="t"></span></button>
-            </div>
+        <!-- ПОДВЕДЕНИЕ ИТОГОВ -->
+        <section id="view-results" class="view">
+            <h1 id="res-status">Правильный ответ!</h1>
+            <div id="score-feed"></div>
         </section>
 
-        <!-- ФИНАЛ -->
-        <section id="final-view" style="display:none;">
-            <h1>🥇 РЕЙТИНГ ПОБЕДИТЕЛЕЙ 🥇</h1>
-            <div id="winners-podium"></div>
+        <!-- ПЬЕДЕСТАЛ -->
+        <section id="view-podium" class="view">
+            <h1>🏆 ФИНАЛ 🏆</h1>
+            <div id="podium-list"></div>
         </section>
     </div>
 
-    <!-- Тяжелая логика вынесена в конец -->
     <script src="game.js"></script>
 </body>
 </html>
