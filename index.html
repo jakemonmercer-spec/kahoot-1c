@@ -3,187 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1C: Kahoot Lab 6</title>
+    <title>1C: Kahoot Clone - Lab 6</title>
+    
+    <!-- Стили -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Firebase Libraries -->
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
-    <style>
-        :root { --kahoot-purple: #46178f; --red: #e21b3c; --blue: #1368ce; --yellow: #d89e00; --green: #26890c; }
-        body { font-family: 'Montserrat', sans-serif; background: var(--kahoot-purple); color: white; margin: 0; overflow-x: hidden; }
-        .header { background: white; color: var(--kahoot-purple); padding: 10px; font-size: 24px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .container { max-width: 900px; margin: 20px auto; padding: 20px; }
-        
-        /* Кнопки ответов в стиле Kahoot */
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 30px; }
-        .ans-btn { border: none; border-radius: 8px; padding: 40px 20px; color: white; font-size: 24px; font-weight: bold; cursor: pointer; display: flex; align-items: center; transition: 0.1s; position: relative; }
-        .ans-btn:active { transform: scale(0.95); }
-        .ans-0 { background: var(--red); } .ans-1 { background: var(--blue); }
-        .ans-2 { background: var(--yellow); } .ans-3 { background: var(--green); }
-        .shape { font-size: 40px; margin-right: 20px; opacity: 0.8; }
-
-        /* Таймер и прогресс */
-        #timer-circle { width: 80px; height: 80px; border-radius: 50%; border: 5px solid white; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 20px auto; background: rgba(0,0,0,0.2); }
-        
-        .card { background: white; color: #333; padding: 30px; border-radius: 15px; text-align: center; }
-        input { width: 100%; padding: 15px; font-size: 20px; border-radius: 8px; border: 2px solid #ddd; margin-bottom: 20px; box-sizing: border-box; }
-        
-        #leaderboard { list-style: none; padding: 0; }
-        #leaderboard li { background: rgba(255,255,255,0.15); margin: 8px 0; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; font-size: 20px; }
-        .admin-box { background: rgba(0,0,0,0.4); padding: 20px; margin-top: 50px; border-radius: 15px; border: 2px dashed #fff; }
-    </style>
 </head>
 <body>
 
-<div class="header">1С: Квиз - Лабораторная №6</div>
-
 <div class="container">
-    <!-- Вход -->
-    <div id="auth-screen" class="card">
-        <h2>Готовы к игре?</h2>
+    <header>
+        <h1>1С: Квиз - Лабораторная №6</h1>
+    </header>
+
+    <!-- Экран входа -->
+    <section id="auth-screen" class="card">
+        <h2>Добро пожаловать!</h2>
         <input type="text" id="username" placeholder="Введите ваш Nickname">
-        <button class="ans-btn ans-1" style="width:100%; padding:20px;" onclick="joinGame()">ПРИСОЕДИНИТЬСЯ</button>
-    </div>
+        <button class="ans-btn ans-1" style="width:100%; display:block;" onclick="joinGame()">ВОЙТИ В ИГРУ</button>
+    </section>
 
     <!-- Игровой экран -->
-    <div id="game-screen" style="display:none;">
+    <section id="game-screen" style="display:none;">
         <div id="timer-circle">20</div>
-        <h1 id="question-text" style="font-size: 36px; min-height: 100px;">Ожидание вопроса...</h1>
+        <h2 id="question-text">Загрузка вопроса...</h2>
         
         <div id="answers-grid" class="grid"></div>
 
-        <div style="margin-top: 40px;">
-            <h3>📊 Текущий рейтинг:</h3>
+        <div class="leaderboard-container">
+            <h3>🏆 Топ студентов:</h3>
             <ul id="leaderboard"></ul>
         </div>
-    </div>
+    </section>
 
-    <!-- Админка -->
-    <div id="admin-panel" class="admin-box">
-        <h3>Панель ведущего</h3>
+    <!-- Панель управления (для тебя) -->
+    <footer class="admin-panel">
+        <h4>Панель ведущего</h4>
         <div id="admin-btns"></div>
-        <button onclick="resetGame()" style="background:grey; color:white; margin-top:20px; padding:10px;">Сбросить всё</button>
-    </div>
+        <button onclick="resetAll()" style="background:red; color:white; border:none; padding:10px; margin-top:15px; border-radius:5px; cursor:pointer;">Сбросить игру</button>
+    </footer>
 </div>
 
-<script>
-    // КОНФИГ FIREBASE
-    const firebaseConfig = {
-        apiKey: "AIzaSyBrPKRi5NWA7JRcdbA2YLO4HPR3ULaBlGk",
-        authDomain: "quiz1c.firebaseapp.com",
-        databaseURL: "https://quiz1c-default-rtdb.firebaseio.com",
-        projectId: "quiz1c",
-        storageBucket: "quiz1c.firebasestorage.app",
-        messagingSenderId: "660786627580",
-        appId: "1:660786627580:web:6a552159559d0eef426879"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    const questions = [
-        { q: "СКД деген эмне?", a: ["Отчетторду түзүүчү", "Справочник", "Макет", "Код"], c: 0, s: ["▲","◆","●","■"] },
-        { q: "Виртуалдык таблицаны тандаңыз:", a: ["Остатки", "Обороты", "ОстаткиИОбороты", "Продажи"], c: 2, s: ["▲","◆","●","■"] },
-        { q: "Отчеттун көрүнүшү бул...", a: ["Запрос", "Макет", "Форма", "Ресурс"], c: 1, s: ["▲","◆","●","■"] },
-        { q: "Период кайсы жерде коюлат?", a: ["Параметры", "Свойства", "Модуль", "Конструктор"], c: 0, s: ["▲","◆","●","■"] }
-    ];
-
-    let myName = "";
-    let canAnswer = false;
-    let timerInterval;
-
-    function joinGame() {
-        myName = document.getElementById('username').value.trim();
-        if(!myName) return alert("Nickname жазыңыз!");
-        
-        const pRef = db.ref('players/' + myName);
-        pRef.set({ score: 0 });
-        pRef.onDisconnect().remove();
-
-        document.getElementById('auth-screen').style.display = 'none';
-        document.getElementById('game-screen').style.display = 'block';
-        initSync();
-    }
-
-    function initSync() {
-        db.ref('currentQuestion').on('value', snap => {
-            const qIdx = snap.val();
-            if(qIdx === -1 || qIdx === null) {
-                renderWaiting();
-            } else {
-                startQuestion(qIdx);
-            }
-        });
-
-        db.ref('players').on('value', snap => {
-            const players = snap.val() || {};
-            const list = document.getElementById('leaderboard');
-            list.innerHTML = "";
-            Object.entries(players).sort((a,b) => b[1].score - a[1].score).slice(0, 5).forEach(([n, d]) => {
-                list.innerHTML += `<li><span>${n}</span> <b>${d.score}</b></li>`;
-            });
-        });
-    }
-
-    function renderWaiting() {
-        clearInterval(timerInterval);
-        document.getElementById('question-text').innerText = "Внимание на экран ведущего!";
-        document.getElementById('answers-grid').innerHTML = "";
-        document.getElementById('timer-circle').innerText = "!";
-    }
-
-    function startQuestion(idx) {
-        canAnswer = true;
-        const q = questions[idx];
-        document.getElementById('question-text').innerText = q.q;
-        const grid = document.getElementById('answers-grid');
-        grid.innerHTML = "";
-        
-        let timeLeft = 20;
-        document.getElementById('timer-circle').innerText = timeLeft;
-        
-        clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-            timeLeft--;
-            document.getElementById('timer-circle').innerText = timeLeft;
-            if(timeLeft <= 0) {
-                clearInterval(timerInterval);
-                canAnswer = false;
-                grid.innerHTML = "<h1>Время вышло!</h1>";
-            }
-        }, 1000);
-
-        q.a.forEach((ans, i) => {
-            grid.innerHTML += `<button class="ans-btn ans-${i}" onclick="submitAns(${idx}, ${i}, ${timeLeft})">
-                <span class="shape">${q.s[i]}</span> ${ans}
-            </button>`;
-        });
-    }
-
-    function submitAns(qIdx, ansIdx, time) {
-        if(!canAnswer) return;
-        canAnswer = false;
-        
-        if(ansIdx === questions[qIdx].c) {
-            const points = 500 + (time * 25); // Макс 1000 баллов
-            db.ref('players/' + myName + '/score').transaction(s => (s || 0) + points);
-            document.getElementById('answers-grid').innerHTML = `<h1>Правильно! +${points}</h1>`;
-        } else {
-            document.getElementById('answers-grid').innerHTML = "<h1>Неправильно...</h1>";
-        }
-    }
-
-    // Кнопки для тебя
-    const adminBtns = document.getElementById('admin-btns');
-    questions.forEach((q, i) => {
-        const b = document.createElement('button');
-        b.innerText = "Вопрос " + (i+1);
-        b.style = "padding:10px; margin:5px; cursor:pointer;";
-        b.onclick = () => db.ref('currentQuestion').set(i);
-        adminBtns.appendChild(b);
-    });
-
-    function resetGame() {
-        db.ref('/').set({ currentQuestion: -1, players: {} });
-    }
-</script>
+    <!-- Твои скрипты -->
+    <script src="firebase-config.js"></script>
+    <script src="game.js"></script>
 </body>
 </html>
