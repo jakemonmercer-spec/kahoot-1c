@@ -4,15 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>1C: Kahoot Clone</title>
+    
+    <!-- 1. Подключаем стили -->
     <link rel="stylesheet" href="style.css">
-    <!-- Firebase SDK -->
+
+    <!-- 2. Библиотеки Firebase (Версия COMPAT) -->
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
 </head>
 <body>
 
     <div id="app">
-        <!-- 1. ЛОББИ (Вход) -->
+        <!-- ЛОББИ -->
         <section id="lobby" class="screen">
             <div class="kahoot-logo">1C: Quiz</div>
             <div class="card">
@@ -25,7 +28,7 @@
             </div>
         </section>
 
-        <!-- 2. ЭКРАН ВОПРОСА -->
+        <!-- ЭКРАН ВОПРОСА -->
         <section id="question-screen" class="screen" style="display:none;">
             <div class="q-header">
                 <h1 id="question-text">Загрузка вопроса...</h1>
@@ -36,16 +39,15 @@
                     <div id="timer-val">20</div>
                 </div>
                 <div class="image-placeholder">
-                    <img src="https://1c.ru/images/logos/1c_eng.png" alt="1C">
+                    <img src="https://1c.ru/images/logos/1c_eng.png" alt="1C" width="200">
                 </div>
                 <div class="stats-side">
-                    <div id="answers-count">0</div>
+                    <div id="answers-count">?</div>
                     <div>Answers</div>
                 </div>
             </div>
 
             <div class="answers-grid" id="answers-grid">
-                <!-- Кнопки Kahoot -->
                 <button class="ans-btn r" onclick="submitAns(0)"><span class="shape">▲</span> <span class="text"></span></button>
                 <button class="ans-btn b" onclick="submitAns(1)"><span class="shape">◆</span> <span class="text"></span></button>
                 <button class="ans-btn y" onclick="submitAns(2)"><span class="shape">●</span> <span class="text"></span></button>
@@ -53,19 +55,14 @@
             </div>
         </section>
 
-        <!-- 3. ТАБЛИЦА ЛИДЕРОВ (Scoreboard) -->
-        <section id="scoreboard" class="screen" style="display:none;">
-            <h1>Scoreboard</h1>
-            <ul id="leader-list"></ul>
-        </section>
-
-        <!-- ПАНЕЛЬ ВЕДУЩЕГО (внизу) -->
+        <!-- ПАНЕЛЬ АДМИНИСТРАТОРА -->
         <footer class="admin-panel">
             <div id="admin-controls"></div>
-            <button class="reset-btn" onclick="resetAll()">RESET GAME</button>
+            <button class="reset-btn" onclick="resetAll()" style="background:red; color:white;">RESET</button>
         </footer>
     </div>
 
+    <!-- 3. Сначала конфиг, потом логика игры -->
     <script src="firebase-config.js"></script>
     <script src="game.js"></script>
 </body>
