@@ -1,37 +1,30 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
+:root { --p: #46178f; --r: #e21b3c; --b: #1368ce; --y: #d89e00; --g: #26890c; }
+body { background: var(--p); color: white; margin: 0; font-family: 'Montserrat', sans-serif; height: 100vh; overflow: hidden; }
 
-body {
-    font-family: 'Montserrat', sans-serif;
-    background-color: #46178f;
-    margin: 0;
-    color: white;
-}
+/* Admin Top Bar */
+#admin-bar { background: #111; padding: 10px; display: flex; justify-content: center; gap: 10px; border-bottom: 2px solid #ffcc00; z-index: 999; position: relative;}
+.adm-btn { border: none; padding: 10px; color: white; border-radius: 4px; cursor: pointer; font-weight: bold; }
+.s-run { background: var(--g); } .s-stop { background: var(--r); } .s-reset { background: #444; }
 
-.screen { padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+/* UI Screens */
+#main-ui { height: calc(100vh - 60px); display: flex; justify-content: center; align-items: center; }
+.v-active { display: flex !important; flex-direction: column; align-items: center; }
 
-/* Лобби */
-.kahoot-logo { font-size: 48px; margin: 40px 0; text-shadow: 2px 2px 10px rgba(0,0,0,0.5); }
-.card { background: white; padding: 20px; border-radius: 10px; display: flex; flex-direction: column; width: 300px; gap: 10px; }
-input { padding: 15px; border: 1px solid #ccc; border-radius: 5px; font-size: 18px; text-align: center; }
-.join-btn { background: #333; color: white; padding: 15px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+/* Lobby */
+.k-logo { font-size: 70px; font-weight: 900; margin-bottom: 20px; }
+#join-card { background: white; padding: 30px; border-radius: 15px; width: 320px; }
+#nick { width: 100%; padding: 15px; font-size: 20px; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box;}
+.enter-btn { width: 100%; background: #333; color: white; padding: 15px; border: none; border-radius: 8px; font-weight: 900; cursor: pointer; }
+#player-chips { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; padding: 20px; }
+.chip { background: white; color: black; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 18px; }
 
-#player-list { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 20px; justify-content: center; }
-.player-tag { background: rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 5px; font-size: 20px; }
-
-/* Экран вопроса */
-.q-header { background: white; color: black; width: 100%; padding: 20px; text-align: center; box-sizing: border-box; }
-.main-area { display: flex; width: 100%; justify-content: space-around; align-items: center; flex: 1; padding: 20px; }
-#timer-val { font-size: 48px; border: 5px solid white; border-radius: 50%; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; }
-.answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; padding: 10px; box-sizing: border-box; }
-
-.ans-btn { height: 120px; border: none; border-radius: 5px; color: white; font-size: 24px; font-weight: bold; cursor: pointer; display: flex; align-items: center; padding: 0 30px; gap: 20px; transition: transform 0.1s; }
-.ans-btn:hover { transform: scale(1.02); }
-.ans-btn.r { background: #e21b3c; }
-.ans-btn.b { background: #1368ce; }
-.ans-btn.y { background: #d89e00; }
-.ans-btn.g { background: #26890c; }
-.shape { font-size: 40px; }
-
-/* Админка */
-.admin-panel { background: rgba(0,0,0,0.9); padding: 15px; position: fixed; bottom: 0; width: 100%; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-.admin-panel button { padding: 10px; cursor: pointer; font-weight: bold; }
+/* Game View */
+#game-view { width: 100%; flex-direction: column; }
+.q-header { background: white; color: black; width: 100%; padding: 25px; text-align: center; }
+.g-mid { display: flex; width: 100%; justify-content: space-around; align-items: center; flex: 1; }
+.t-circle { font-size: 45px; border: 6px solid white; border-radius: 50%; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); }
+.k-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; height: 35vh; padding: 10px; box-sizing: border-box; }
+.k-btn { border: none; border-radius: 5px; color: white; font-size: 28px; font-weight: bold; cursor: pointer; display: flex; align-items: center; padding: 0 40px; gap: 20px; }
+.k-btn.r { background: var(--r); } .k-btn.b { background: var(--b); }
+.k-btn.y { background: var(--y); } .k-btn.g { background: var(--g); }
+.s { font-size: 40px; opacity: 0.8; }
