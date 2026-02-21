@@ -1,0 +1,110 @@
+:root {
+    --kahoot-purple: #46178f;
+    --red: #e21b3c;
+    --blue: #1368ce;
+    --yellow: #d89e00;
+    --green: #26890c;
+    --white: #ffffff;
+}
+
+body {
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: var(--kahoot-purple);
+    color: var(--white);
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+.container {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+}
+
+.card {
+    background: var(--white);
+    color: #333;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+/* Сетка ответов */
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.ans-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 35px 20px;
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: transform 0.1s, brightness 0.2s;
+}
+
+.ans-btn:hover { brightness(1.1); }
+.ans-btn:active { transform: scale(0.95); }
+
+.ans-0 { background: var(--red); }
+.ans-1 { background: var(--blue); }
+.ans-2 { background: var(--yellow); }
+.ans-3 { background: var(--green); }
+
+.shape { font-size: 30px; margin-right: 15px; }
+
+/* Таймер */
+#timer-circle {
+    width: 70px;
+    height: 70px;
+    border: 4px solid white;
+    border-radius: 50%;
+    margin: 20px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+/* Лидерборд */
+#leaderboard {
+    list-style: none;
+    padding: 0;
+    text-align: left;
+}
+
+#leaderboard li {
+    background: rgba(255,255,255,0.1);
+    margin: 5px 0;
+    padding: 12px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.admin-panel {
+    background: rgba(0,0,0,0.5);
+    margin-top: 50px;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px dashed white;
+}
+
+input {
+    width: 100%;
+    padding: 15px;
+    font-size: 18px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: none;
+    box-sizing: border-box;
+}
