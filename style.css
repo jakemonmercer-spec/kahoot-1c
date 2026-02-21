@@ -1,74 +1,63 @@
 :root {
-    --purple: #46178f; --red: #e21b3c; --blue: #1368ce; 
-    --yellow: #d89e00; --green: #26890c; --dark: #333;
-}
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-body { 
-    margin: 0; background: var(--purple); color: white; 
-    font-family: 'Montserrat', sans-serif; overflow: hidden; 
+    --bg: #46178f; --red: #e21b3c; --blue: #1368ce; 
+    --gold: #d89e00; --green: #26890c; --white: #ffffff;
+    --glass: rgba(255, 255, 255, 0.15);
 }
 
-/* Admin Dashboard */
-#admin-dashboard {
-    background: #000; padding: 10px; display: flex; justify-content: center;
-    gap: 10px; border-bottom: 2px solid #ffcc00; position: relative; z-index: 100;
-}
-.a-btn { border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-.a-btn.start { background: var(--green); color: white; }
-.a-btn.reset { background: #666; color: white; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Montserrat', sans-serif; }
 
-/* Screen Management */
+body { margin: 0; background: var(--bg); color: var(--white); height: 100vh; overflow: hidden; }
+
+/* Адаптивный Админ-бар */
+#admin-pwa-bar {
+    background: #000; padding: 8px; display: flex; justify-content: center;
+    gap: 10px; border-bottom: 2px solid #ffcc00; font-size: 14px;
+}
+#admin-pwa-bar button { border: none; padding: 5px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+.primary { background: var(--green); color: white; }
+.danger { background: #444; color: #ff5555; }
+
+/* Контейнер экранов */
 .screen { 
-    display: none; width: 100%; height: calc(100vh - 60px); 
-    flex-direction: column; align-items: center; justify-content: center;
-    padding: 20px; text-align: center;
+    display: none; width: 100%; height: calc(100vh - 50px); 
+    flex-direction: column; align-items: center; padding: 20px; text-align: center;
 }
-.screen.active { display: flex; }
+.screen.active { display: flex; animation: fadeIn 0.3s ease; }
 
-/* UI Elements */
-.kahoot-logo { font-size: clamp(40px, 8vw, 80px); font-weight: 900; margin-bottom: 20px; }
-.auth-card { background: white; padding: 30px; border-radius: 15px; width: 100%; max-width: 400px; }
-input { 
-    width: 100%; padding: 15px; font-size: 20px; border: 2px solid #eee; 
-    border-radius: 8px; margin-bottom: 10px; text-align: center;
-}
-.btn-main { 
-    width: 100%; background: var(--dark); color: white; padding: 15px; 
-    border: none; border-radius: 8px; font-weight: 900; cursor: pointer;
-}
+/* Лобби */
+.k-logo { font-size: clamp(3rem, 10vw, 5.5rem); font-weight: 800; margin: 2vh 0; }
+.glass-card { background: var(--white); padding: 30px; border-radius: 18px; width: 100%; max-width: 380px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+.glass-card input { width: 100%; padding: 15px; font-size: 20px; border: 2px solid #eee; border-radius: 10px; margin-bottom: 15px; text-align: center; }
+.btn-hit { width: 100%; background: #333; color: white; padding: 16px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 1.2rem; }
 
-#player-tags { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 20px; overflow-y: auto; }
-.tag { background: white; color: black; padding: 8px 15px; border-radius: 5px; font-weight: bold; animation: pop 0.3s ease; }
+#player-tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 20px; overflow-y: auto; width: 100%; }
+.tag { background: var(--glass); border: 1px solid rgba(255,255,255,0.3); padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 14px; }
 
-/* Question UI */
-.q-header { background: white; color: black; width: 100%; padding: 20px; position: absolute; top: 55px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-.q-ui { display: flex; justify-content: space-around; align-items: center; width: 100%; max-width: 900px; margin: 60px 0; }
-.timer-ring { font-size: 40px; border: 6px solid white; border-radius: 50%; width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; }
+/* Геймплей */
+.question-overlay { background: var(--white); color: #000; width: 100vw; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); position: absolute; top: 50px; left: 0; }
+.game-hud { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 900px; margin-top: 100px; padding: 20px; }
+.timer-orb { font-size: 40px; font-weight: 800; border: 5px solid white; width: 85px; height: 85px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); }
 
 .answers-grid { 
     display: grid; grid-template-columns: 1fr 1fr; gap: 12px; 
-    width: 100%; max-width: 1100px; height: 35vh; 
+    width: 100%; max-width: 1100px; flex: 1; margin-bottom: 15px;
 }
-.ans-item { border: none; border-radius: 8px; color: white; font-size: 24px; font-weight: bold; display: flex; align-items: center; padding: 0 30px; cursor: pointer; transition: 0.1s; }
-.ans-item:active { transform: scale(0.95); }
-.ans-item.r { background: var(--red); } .ans-item.b { background: var(--blue); }
-.ans-item.y { background: var(--yellow); } .ans-item.g { background: var(--green); }
-.sh { font-size: 35px; margin-right: 20px; }
+.ans-btn { border: none; border-radius: 10px; color: white; font-size: clamp(1.1rem, 3vw, 1.6rem); font-weight: 700; display: flex; align-items: center; padding: 0 25px; cursor: pointer; transition: transform 0.1s; }
+.ans-btn:active { transform: scale(0.96); }
+.ans-btn.r { background: var(--red); } .ans-btn.b { background: var(--blue); }
+.ans-btn.y { background: var(--gold); } .ans-btn.g { background: var(--green); }
+.s { font-size: 2.2rem; margin-right: 15px; opacity: 0.8; }
 
-/* Mobile optimization */
-@media (max-width: 700px) {
-    .answers-grid { grid-template-columns: 1fr; height: 50vh; }
-    .ans-item { height: 60px; }
-    .q-image img { width: 120px; }
-}
+/* Пьедестал */
+.podium-row { background: var(--glass); width: 100%; max-width: 500px; padding: 18px; margin: 6px; border-radius: 12px; display: flex; justify-content: space-between; font-size: 1.3rem; border-left: 8px solid #fff; }
 
-/* Podium */
-.pod-row { 
-    background: rgba(255,255,255,0.1); width: 100%; max-width: 500px; 
-    padding: 15px 25px; margin: 5px; border-radius: 10px; 
-    display: flex; justify-content: space-between; font-size: 22px;
+/* Мобильная адаптация */
+@media (max-width: 600px) {
+    .answers-grid { grid-template-columns: 1fr; grid-template-rows: repeat(4, 1fr); }
+    .ans-btn { padding: 10px 20px; }
+    .timer-orb { width: 65px; height: 65px; font-size: 28px; }
+    .question-overlay h2 { font-size: 1.1rem; }
 }
 
-@keyframes pop { from {transform: scale(0);} to {transform: scale(1);} }
-.pulse { animation: pulse 1s infinite alternate; }
-@keyframes pulse { from {opacity: 0.6;} to {opacity: 1;} }
+@keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+@keyframes pop { from {transform: scale(0.8);} to {transform: scale(1);} }
