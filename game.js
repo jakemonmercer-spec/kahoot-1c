@@ -1,13 +1,37 @@
-// 1. ДАННЫЕ ВОПРОСОВ (Лабораторная №6)
+// ==========================================
+// 1. ДАННЫЕ И КОНСТАНТЫ
+// ==========================================
+
+// Вопросы строго по 6-й Лабораторной работе 1С
 const QUIZ_DATA = [
-    { q: "Для чего предназначен объект 'Отчет' в 1С?", a: ["Для ввода данных", "Для анализа и вывода сводной информации", "Для хранения списка сотрудников", "Для удаления записей"], c: 1 },
-    { q: "Какой инструмент используется в 6-й лабе для создания отчета без кода?", a: ["Макет оформления", "Конструктор форм", "СКД (Система компоновки данных) ", "Модуль объекта"], c: 2 },
-    { q: "Какую виртуальную таблицу мы выбрали в Конструкторе запроса?", a: ["Остатки", "Обороты", "ОстаткиИОбороты", "Продажи"], c: 2 },
-    { q: "Зачем в настройках СКД нужны 'Детальные записи'?", a: ["Чтобы скрыть итоги", "Для вывода подробных строк (Склад, Товар)", "Для защиты отчета", "Это ошибка"], c: 1 },
-    { q: "Что позволяет пользователю менять даты отчета в режиме '1С:Предприятие'?", a: ["Параметры в 'Пользовательских настройках'", "Длина кода справочника", "Имя подсистемы", "Кнопка СБРОС"], c: 0 }
+    { 
+        q: "Для чего предназначен объект 'Отчет' в 1С?", 
+        a: ["Для ввода новых данных в базу", "Для анализа и вывода сводной информации", "Для хранения списка всех сотрудников", "Для удаления старых записей"], 
+        c: 1 
+    },
+    { 
+        q: "Какой основной инструмент используется в 6-й лабе для создания отчета?", 
+        a: ["Макет оформления", "Конструктор форм", "СКД (Система компоновки данных)", "Модуль объекта"], 
+        c: 2 
+    },
+    { 
+        q: "Какую виртуальную таблицу мы выбрали в Конструкторе запроса?", 
+        a: ["Остатки", "Обороты", "ОстаткиИОбороты", "Продажи"], 
+        c: 2 
+    },
+    { 
+        q: "Зачем в настройках СКД добавляется группировка 'Детальные записи'?", 
+        a: ["Чтобы скрыть итоги", "Для вывода подробных строк (Склад, Товар)", "Для защиты отчета паролем", "Это техническая ошибка"], 
+        c: 1 
+    },
+    { 
+        q: "Что нужно сделать, чтобы пользователь мог сам менять даты отчета в '1С:Предприятие'?", 
+        a: ["Включить параметры в 'Пользовательские настройки'", "Изменить длину кода справочника", "Переименовать подсистему", "Написать код на языке C++"], 
+        c: 0 
+    }
 ];
 
-// 30 ЖИВОТНЫХ ДЛЯ АВТО-ИМЕН
+// Список 30 животных для автоматического присвоения имен опоздавшим
 const ANIMAL_NAMES = [
     "Мудрый Кот", "Быстрый Гепард", "Сонная Панда", "Грозный Тигр", "Хитрый Лис", 
     "Смелый Лев", "Тихий Волк", "Веселый Енот", "Гордый Орел", "Умный Сова",
@@ -17,6 +41,7 @@ const ANIMAL_NAMES = [
     "Зоркий Сокол", "Могучий Лось", "Пятнистый Жираф", "Речной Выдра", "Горный Козел"
 ];
 
+// Глобальное состояние
 let state = {
     myNick: localStorage.getItem('quiz_nick') || "",
     currentQIdx: -1,
@@ -25,179 +50,272 @@ let state = {
     serverOffset: 0
 };
 
-// Разница во времени с Google
-db.ref('.info/serverTimeOffset').on('value', snap => { state.serverOffset = snap.val() || 0; });
+// Получаем смещение времени сервера Google для идеальной синхронизации
+db.ref('.info/serverTimeOffset').on('value', snap => {
+    state.serverOffset = snap.val() || 0;
+});
 
-// --- ЛОГИКА ИГРОКА ---
+// ==========================================
+// 2. ЛОГИКА ИГРОКА
+// ==========================================
+
 const User = {
-    async join(manualNick = "") {
-        SoundEngine.init();
-        let nameToUse = manualNick || document.getElementById('p-nick')?.value.trim();
+    async join(autoNick = "") {
+        if (typeof SoundEngine !== 'undefined') SoundEngine.init();
         
-        // Если имя не введено - берем случайное животное
+        let nameToUse = autoNick || document.getElementById('p-nick').value.trim();
+        
+        // Если имя пустое - берем животное + рандомное число
         if (!nameToUse) {
-            nameToUse = ANIMAL_NAMES[Math.floor(Math.random() * ANIMAL_NAMES.length)] + " " + Math.floor(Math.random()*99);
+            const randomAnimal = ANIMAL_NAMES[Math.floor(Math.random() * ANIMAL_NAMES.length)];
+            nameToUse = randomAnimal + " " + Math.floor(Math.random() * 100);
         }
         
         state.myNick = nameToUse;
         localStorage.setItem('quiz_nick', state.myNick);
 
         const playerRef = db.ref('players/' + state.myNick);
-        await playerRef.update({ score: 0, lastActive: firebase.database.ServerValue.TIMESTAMP });
+        await playerRef.update({ 
+            score: 0, 
+            lastActive: firebase.database.ServerValue.TIMESTAMP 
+        });
+
+        // Автоматическое удаление при закрытии вкладки (Activity Control)
         playerRef.onDisconnect().remove();
 
-        SoundEngine.playTap();
+        if (typeof SoundEngine !== 'undefined') SoundEngine.playTap();
         this.renderIdentity();
         
-        const card = document.getElementById('join-card');
-        if(card) card.innerHTML = `<h2 style="color:#333">Вы в игре: ${state.myNick}</h2>`;
+        const joinCard = document.getElementById('join-card');
+        if (joinCard) joinCard.innerHTML = `<h2 style="color:#333; font-weight:900;">ВЫ В ИГРЕ!<br><small>${state.myNick}</small></h2>`;
     },
 
     renderIdentity() {
         if (!state.myNick || state.myNick === "undefined") return;
-        let idTag = document.getElementById('player-id') || document.createElement('div');
-        idTag.id = 'player-id';
-        idTag.className = 'player-identity';
+        let idTag = document.getElementById('player-id');
+        if (!idTag) {
+            idTag = document.createElement('div');
+            idTag.id = 'player-id';
+            idTag.className = 'player-identity';
+            document.body.appendChild(idTag);
+        }
         idTag.innerText = `Игрок: ${state.myNick}`;
-        if (!document.getElementById('player-id')) document.body.appendChild(idTag);
     },
 
     hit(idx) {
         if (!state.canHit || !state.myNick || state.myNick === "undefined") return;
         state.canHit = false;
-        SoundEngine.playTap();
+        
+        if (typeof SoundEngine !== 'undefined') SoundEngine.playTap();
         document.getElementById('ans-grid').style.opacity = "0.3";
 
+        // Проверка ответа
         if (idx === QUIZ_DATA[state.currentQIdx].c) {
-            let t = parseInt(document.getElementById('timer-sec').innerText) || 0;
-            let points = 500 + (t * 25);
+            let timerEl = document.getElementById('timer-sec');
+            let timeLeft = timerEl ? parseInt(timerEl.innerText) : 0;
+            if (isNaN(timeLeft)) timeLeft = 0;
+
+            // Баллы Kahoot: 500 база + (секунды * 25)
+            let points = 500 + (timeLeft * 25);
             db.ref('players/' + state.myNick + '/score').transaction(s => (s || 0) + points);
-            SoundEngine.playCorrect();
+            if (typeof SoundEngine !== 'undefined') SoundEngine.playCorrect();
         } else {
-            SoundEngine.playWrong();
+            if (typeof SoundEngine !== 'undefined') SoundEngine.playWrong();
         }
     }
 };
 
-// --- ЛОГИКА АДМИНА ---
+// ==========================================
+// 3. ЛОГИКА АДМИНИСТРАТОРА
+// ==========================================
+
 const Admin = {
     login() {
         if (document.getElementById('pin').value === "123") {
             document.getElementById('auth-lock').style.display = 'none';
             document.getElementById('adm-tools').style.display = 'flex';
+            if (typeof SoundEngine !== 'undefined') SoundEngine.playStart();
+        } else {
+            alert("Неверный PIN");
         }
     },
 
+    setStep(step) {
+        db.ref('game').update({ step: step });
+    },
+
     async runAuto() {
+        // Очистка призраков перед стартом
         await db.ref('players/undefined').remove();
+
         for (let i = 0; i < QUIZ_DATA.length; i++) {
-            await db.ref('game').set({ step: 'getready', qIdx: i, serverStartTime: firebase.database.ServerValue.TIMESTAMP });
+            // ЭТАП 1: Подготовка (4 секунды)
+            await db.ref('game').set({ 
+                step: 'getready', 
+                qIdx: i, 
+                serverStartTime: firebase.database.ServerValue.TIMESTAMP 
+            });
             await new Promise(r => setTimeout(r, 4000));
-            await db.ref('game').update({ step: 'game', serverStartTime: firebase.database.ServerValue.TIMESTAMP });
+
+            // ЭТАП 2: Вопрос (21 секунда)
+            await db.ref('game').update({ 
+                step: 'game',
+                serverStartTime: firebase.database.ServerValue.TIMESTAMP 
+            });
             await new Promise(r => setTimeout(r, 21000));
+
+            // ЭТАП 3: Результаты раунда (6 секунд)
             await db.ref('game').update({ step: 'results' });
             await new Promise(r => setTimeout(r, 6000));
         }
+
+        // ФИНАЛ
         db.ref('game').update({ step: 'podium' });
     },
 
     reset() {
-        if (confirm("Сбросить систему?")) {
-            db.ref('/').set({ game: { step: 'lobby', qIdx: -1 }, players: {} });
+        if (confirm("ВНИМАНИЕ: Это полностью очистит базу данных. Продолжить?")) {
+            db.ref('/').set({ 
+                game: { step: 'lobby', qIdx: -1 }, 
+                players: {} 
+            });
             localStorage.clear();
             location.reload();
         }
     }
 };
 
-// --- СИНХРОНИЗАЦИЯ ТАЙМЕРА ---
+// ==========================================
+// 4. СИНХРОНИЗАЦИЯ ТАЙМЕРА И СОСТОЯНИЙ
+// ==========================================
+
 function startSyncTimer(startTime) {
     clearInterval(state.syncTimer);
     if (!startTime) return;
 
     state.syncTimer = setInterval(() => {
-        const elapsed = Math.floor(((Date.now() + state.serverOffset) - startTime) / 1000);
+        const nowServer = Date.now() + state.serverOffset;
+        const elapsed = Math.floor((nowServer - startTime) / 1000);
         let left = 20 - elapsed;
+
         if (left < 0) left = 0;
         
-        const el = document.getElementById('timer-sec');
-        if (el) {
-            el.innerText = left;
-            if (left <= 5 && left > 0) SoundEngine.playTick();
-            if (left === 0) { state.canHit = false; document.getElementById('ans-grid').style.opacity = "0.3"; clearInterval(state.syncTimer); }
+        const timerEl = document.getElementById('timer-sec');
+        if (timerEl) {
+            timerEl.innerText = left;
+            if (left <= 5 && left > 0) {
+                if (typeof SoundEngine !== 'undefined') SoundEngine.playTick();
+            }
+            if (left === 0) {
+                state.canHit = false;
+                document.getElementById('ans-grid').style.opacity = "0.3";
+                clearInterval(state.syncTimer);
+            }
         }
     }, 1000);
 }
 
-// --- ГЛАВНЫЙ СЛУШАТЕЛЬ ---
+// Слушатель игры (Центральное управление)
 db.ref('game').on('value', snap => {
     const g = snap.val() || { step: 'lobby', qIdx: -1 };
     state.currentQIdx = g.qIdx;
 
-    // АВТО-ВХОД ДЛЯ ОПОЗДАВШИХ
+    // АВТО-ВХОД ДЛЯ ОПОЗДАВШИХ: если игрок зашел, когда игра уже идет
     if (!state.myNick && g.step !== 'lobby') {
-        User.join(); // Автоматически заходим под именем животного
+        User.join(); 
     }
 
+    // Переключение экранов
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     const target = document.getElementById('view-' + g.step);
     if (target) target.classList.add('active');
 
+    // Логика конкретных экранов
     if (g.step === 'game') {
         state.canHit = true;
         document.getElementById('ans-grid').style.opacity = "1";
+        
         const q = QUIZ_DATA[state.currentQIdx];
         if (q) {
             document.getElementById('q-text').innerText = q.q;
-            const b = document.querySelectorAll('.ans-btn .t');
-            q.a.forEach((t, i) => { if (b[i]) b[i].innerText = t; });
+            const btnTexts = document.querySelectorAll('.ans-btn .t');
+            q.a.forEach((text, i) => { if (btnTexts[i]) btnTexts[i].innerText = text; });
         }
         startSyncTimer(g.serverStartTime);
     }
-    if (g.step === 'podium') { SoundEngine.playFanfare(); createConfetti(); }
+    
+    if (g.step === 'podium') {
+        if (typeof SoundEngine !== 'undefined') SoundEngine.playFanfare();
+        createConfetti();
+    }
 });
 
-// ОБНОВЛЕНИЕ РЕЙТИНГА (Всегда показывает ТОП-5, даже с 0 баллов)
+// Слушатель игроков (Лидерборд в реальном времени)
 db.ref('players').on('value', snap => {
-    const p = snap.val() || {};
-    if (p.undefined) db.ref('players/undefined').remove();
+    const playersData = snap.val() || {};
+    
+    // Удаляем призраков
+    if (playersData.undefined) db.ref('players/undefined').remove();
 
-    const sorted = Object.entries(p)
+    const sorted = Object.entries(playersData)
         .filter(([name]) => name !== "undefined")
         .sort((a, b) => b[1].score - a[1].score);
     
-    const lobby = document.getElementById('player-tags');
-    if (lobby) lobby.innerHTML = sorted.map(([n]) => `<div class="tag">${n}</div>`).join('');
+    // 1. Обновляем Лобби (Список имен)
+    const lobbyList = document.getElementById('player-tags');
+    if (lobbyList) {
+        lobbyList.innerHTML = sorted.map(([name]) => `<div class="tag">${name}</div>`).join('');
+    }
     
-    const online = document.getElementById('online-counter');
-    if (online) online.innerText = `${sorted.length} игроков онлайн`;
+    const counter = document.getElementById('online-counter');
+    if (counter) counter.innerText = `${sorted.length} игроков в сети`;
 
-    const podiumHtml = sorted.slice(0, 5).map(([n, d], i) => `
-        <div class="podium-row ${i === 0 ? 'place-1' : ''}">
-            <span>${i + 1}. ${n}</span>
-            <b>${d.score}</b>
+    // 2. Рендерим ТОП-5 (Даже если баллы 0)
+    const podiumHtml = sorted.slice(0, 5).map(([name, data], i) => `
+        <div class="winner-row ${i === 0 ? 'place-1' : ''}">
+            <span>${i + 1}. ${name}</span>
+            <b>${data.score}</b>
         </div>
-    `).join('');
+    `).join('') || "<div class='tag'>Ожидание участников...</div>";
     
-    // Если игроков нет, выводим заглушку, чтобы экран не был пустым
-    const finalHtml = podiumHtml || "<div class='tag'>Ждем ответов...</div>";
+    const roundBox = document.getElementById('round-leaderboard');
+    if (roundBox) roundBox.innerHTML = podiumHtml;
     
-    document.getElementById('round-leaderboard').innerHTML = finalHtml;
-    document.getElementById('podium-final').innerHTML = finalHtml;
-    
-    const ansCount = document.getElementById('ans-count');
-    if (ansCount) ansCount.innerText = sorted.length;
+    const finalBox = document.getElementById('podium-final');
+    if (finalBox) finalBox.innerHTML = podiumHtml;
+
+    // 3. Счетчик ответов
+    const ansCounter = document.getElementById('ans-count');
+    if (ansCounter) ansCounter.innerText = sorted.length;
 });
 
+// ==========================================
+// 5. ВИЗУАЛЬНЫЕ ЭФФЕКТЫ
+// ==========================================
+
 function createConfetti() {
-    for (let i = 0; i < 60; i++) {
+    for (let i = 0; i < 70; i++) {
         const c = document.createElement('div');
         c.className = 'confetti';
         c.style.left = Math.random() * 100 + 'vw';
-        c.style.backgroundColor = ['#ff3366','#2de2e2','#f8e71c','#7ed321'][Math.floor(Math.random()*4)];
+        c.style.backgroundColor = ['#f0f', '#0ff', '#ff0', '#0f0', '#f00'][Math.floor(Math.random()*5)];
+        c.style.width = Math.random() * 10 + 5 + 'px';
+        c.style.height = c.style.width;
         document.body.appendChild(c);
-        c.animate([{ top: '-10%', transform: 'rotate(0deg)' }, { top: '110%', transform: 'rotate(720deg)' }], { duration: 2500 + Math.random() * 2000, iterations: Infinity });
+        
+        c.animate([
+            { top: '-10%', transform: 'rotate(0deg)' },
+            { top: '110%', transform: 'rotate(720deg)' }
+        ], { 
+            duration: 2000 + Math.random() * 3000, 
+            iterations: Infinity 
+        });
     }
 }
 
+// Запуск плашки имени при загрузке
 if (state.myNick && state.myNick !== "undefined") User.renderIdentity();
+
+// Экспорт объектов
+window.User = User;
+window.Admin = Admin;
