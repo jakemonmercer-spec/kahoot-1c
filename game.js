@@ -1,9 +1,9 @@
 // ==========================================
-// 1. ДАННЫЕ И ВОПРОСЫ (Лабораторная №6 + База 1С)
+// 1. ДАННЫЕ И КОНСТАНТЫ (12 ВОПРОСОВ)
 // ==========================================
 
 const QUIZ_DATA = [
-    // --- Вопросы из Лабораторной №6 ---
+    // --- Вопросы из Лабораторной №6 (7 шт) ---
     { 
         q: "Для чего предназначен объект конфигурации «Отчет»?", 
         a: ["Для хранения паролей", "Для анализа данных и создания сводных таблиц", "Для ввода новых сотрудников", "Для удаления базы"], 
@@ -16,7 +16,7 @@ const QUIZ_DATA = [
     },
     { 
         q: "Что такое виртуальная таблица «ОстаткиИОбороты»?", 
-        a: ["Список всех картинок", "Таблица, которая сама считает приход, расход и остатки", "Архив старых документов", "Таблица для чата"], 
+        a: ["Список всех картинкок", "Таблица, которая сама считает приход, расход и остатки", "Архив старых документов", "Таблица для чата"], 
         c: 1 
     },
     { 
@@ -39,7 +39,7 @@ const QUIZ_DATA = [
         a: ["«Сформировать»", "«Пуск»", "«Записать и закрыть»", "«Провести»"], 
         c: 0 
     },
-    // --- Банально простые вопросы про 1С ---
+    // --- Базовые вопросы про 1С (5 шт) ---
     { 
         q: "Как называется компания-разработчик системы «1С:Предприятие»?", 
         a: ["1С", "Microsoft", "Google", "Apple"], 
@@ -67,7 +67,7 @@ const QUIZ_DATA = [
     }
 ];
 
-// Список 30 животных для автоматического присвоения имен
+// Список 30 животных
 const ANIMAL_NAMES = [
     "Мудрый Кот", "Быстрый Гепард", "Сонная Панда", "Грозный Тигр", "Хитрый Лис", 
     "Смелый Лев", "Тихий Волк", "Веселый Енот", "Гордый Орел", "Умный Сова",
@@ -77,6 +77,7 @@ const ANIMAL_NAMES = [
     "Зоркий Сокол", "Могучий Лось", "Пятнистый Жираф", "Речной Выдра", "Горный Козел"
 ];
 
+// Глобальное состояние
 let state = {
     myNick: localStorage.getItem('quiz_nick') || "",
     currentQIdx: -1,
@@ -85,7 +86,7 @@ let state = {
     serverOffset: 0
 };
 
-// Синхронизация времени с серверами Google
+// Синхронизация времени с сервером
 db.ref('.info/serverTimeOffset').on('value', snap => {
     state.serverOffset = snap.val() || 0;
 });
@@ -100,16 +101,24 @@ const User = {
         
         let nameToUse = forcedNick || (document.getElementById('p-nick') ? document.getElementById('p-nick').value.trim() : "");
         
+        // Авто-имя если пусто + защита от дублей через ID
         if (!nameToUse) {
             const randomAnimal = ANIMAL_NAMES[Math.floor(Math.random() * ANIMAL_NAMES.length)];
-            nameToUse = randomAnimal + " #" + Math.floor(Math.random() * 100);
+            nameToUse = randomAnimal + " #" + Math.floor(Math.random() * 1000);
         }
         
         state.myNick = nameToUse;
         localStorage.setItem('quiz_nick', state.myNick);
 
+        // Инициализация игрока: score: 0, lastChoice: -1 (важно для счетчика)
         const playerRef = db.ref('players/' + state.myNick);
-        await playerRef.set({ score: 0, lastChoice: -1, lastActive: firebase.database.ServerValue.TIMESTAMP });
+        await playerRef.set({ 
+            score: 0, 
+            lastChoice: -1,
+            lastActive: firebase.database.ServerValue.TIMESTAMP 
+        });
+
+        // Удаление при выходе
         playerRef.onDisconnect().remove();
 
         if (typeof SoundEngine !== 'undefined') SoundEngine.playTap();
@@ -129,15 +138,20 @@ const User = {
     },
 
     hit(idx) {
-        if (!state.canHit || !state.myNick) return;
+        if (!state.canHit || !state.myNick || state.myNick === "undefined") return;
         state.canHit = false;
+        
         if (typeof SoundEngine !== 'undefined') SoundEngine.playTap();
         document.getElementById('ans-grid').style.opacity = "0.3";
+
+        // Мгновенная запись выбора в базу для синхронизации графиков
         db.ref('players/' + state.myNick + '/lastChoice').set(idx);
 
         if (idx === QUIZ_DATA[state.currentQIdx].c) {
             let timerEl = document.getElementById('timer-sec');
             let timeLeft = timerEl ? parseInt(timerEl.innerText) : 0;
+            if (isNaN(timeLeft)) timeLeft = 0;
+
             let points = 500 + (timeLeft * 25);
             db.ref('players/' + state.myNick + '/score').transaction(s => (s || 0) + points);
             if (typeof SoundEngine !== 'undefined') SoundEngine.playCorrect();
@@ -148,38 +162,47 @@ const User = {
 };
 
 // ==========================================
-// 3. ЛОГИКА АДМИНИСТРАТОРА
+// 3. ЛОГИКА АДМИНИСТРАТОРА (АВТОПИЛОТ)
 // ==========================================
 
 const Admin = {
     login() {
-        const pinVal = document.getElementById('pin')?.value;
+        const pinVal = document.getElementById('pin') ? document.getElementById('pin').value : "";
         if (pinVal === "123") {
             document.getElementById('auth-lock').style.display = 'none';
             document.getElementById('adm-tools').style.display = 'flex';
         }
     },
 
+    setStep(step) { db.ref('game').update({ step: step }); },
+
     async runAuto() {
         await db.ref('players/undefined').remove();
+
         for (let i = 0; i < QUIZ_DATA.length; i++) {
+            // Сброс выбора у ВСЕХ перед началом вопроса
             const playersSnap = await db.ref('players').once('value');
             const updates = {};
             playersSnap.forEach(child => { updates[`players/${child.key}/lastChoice`] = -1; });
             await db.ref().update(updates);
 
+            // 1. Get Ready
             await db.ref('game').set({ step: 'getready', qIdx: i, serverStartTime: firebase.database.ServerValue.TIMESTAMP });
             await new Promise(r => setTimeout(r, 4000));
+
+            // 2. Question
             await db.ref('game').update({ step: 'game', serverStartTime: firebase.database.ServerValue.TIMESTAMP });
             await new Promise(r => setTimeout(r, 21000));
+
+            // 3. Results
             await db.ref('game').update({ step: 'results' });
-            await new Promise(r => setTimeout(r, 6000));
+            await new Promise(r => setTimeout(r, 6500));
         }
         db.ref('game').update({ step: 'podium' });
     },
 
     reset() {
-        if (confirm("ПОЛНЫЙ СБРОС ВСЕГО?")) {
+        if (confirm("ВЫ УВЕРЕНЫ? БАЗА БУДЕТ ОЧИЩЕНА!")) {
             db.ref('/').set({ game: { step: 'lobby', qIdx: -1 }, players: {} });
             localStorage.clear();
             location.reload();
@@ -194,28 +217,38 @@ const Admin = {
 function startSyncTimer(startTime) {
     clearInterval(state.syncTimer);
     if (!startTime) return;
+
     state.syncTimer = setInterval(() => {
-        const elapsed = Math.floor(((Date.now() + state.serverOffset) - startTime) / 1000);
+        const nowServer = Date.now() + state.serverOffset;
+        const elapsed = Math.floor((nowServer - startTime) / 1000);
         let left = 20 - elapsed;
         if (left < 0) left = 0;
+        
         const el = document.getElementById('timer-sec');
         if (el) {
             el.innerText = isNaN(left) ? "20" : left;
             if (left <= 5 && left > 0 && typeof SoundEngine !== 'undefined') SoundEngine.playTick();
-            if (left === 0) { state.canHit = false; document.getElementById('ans-grid').style.opacity = "0.3"; clearInterval(state.syncTimer); }
+            if (left === 0) {
+                state.canHit = false;
+                document.getElementById('ans-grid').style.opacity = "0.3";
+                clearInterval(state.syncTimer);
+            }
         }
     }, 1000);
 }
 
 // ==========================================
-// 5. ЕДИНЫЙ СЛУШАТЕЛЬ СОСТОЯНИЙ
+// 5. ГЛАВНЫЕ СЛУШАТЕЛИ FIREBASE
 // ==========================================
 
 db.ref('game').on('value', snap => {
     const g = snap.val() || { step: 'lobby', qIdx: -1 };
     state.currentQIdx = g.qIdx;
 
-    if (!state.myNick && g.step !== 'lobby') { User.join(); }
+    // АВТО-ВХОД ДЛЯ ОПОЗДАВШИХ: Если игры запущена, а ника нет
+    if (!state.myNick && g.step !== 'lobby' && g.step !== 'wait') {
+        User.join(); 
+    }
 
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     const target = document.getElementById('view-' + g.step);
@@ -232,13 +265,14 @@ db.ref('game').on('value', snap => {
         }
         startSyncTimer(g.serverStartTime);
     }
+    
     if (g.step === 'podium') {
         if (typeof SoundEngine !== 'undefined') SoundEngine.playFanfare();
         createConfetti();
     }
 });
 
-// Слушатель игроков
+// Слушатель игроков: Обновляет списки и статистику
 db.ref('players').on('value', snap => {
     const pData = snap.val() || {};
     if (pData.undefined) db.ref('players/undefined').remove();
@@ -246,14 +280,16 @@ db.ref('players').on('value', snap => {
     const allPlayersEntries = Object.entries(pData).filter(([name]) => name !== "undefined");
     const sortedPlayers = [...allPlayersEntries].sort((a, b) => b[1].score - a[1].score);
     
+    // 1. Отображение в лобби
     const lobby = document.getElementById('player-tags');
     if (lobby) lobby.innerHTML = allPlayersEntries.map(([n]) => `<div class="tag">${n}</div>`).join('');
     
-    document.getElementById('online-counter').innerText = `${allPlayersEntries.length} студентов онлайн`;
+    const counter = document.getElementById('online-counter');
+    if (counter) counter.innerText = `${allPlayersEntries.length} участников онлайн`;
 
-    // Статистика графиков
+    // 2. Статистика ответов раунда
     let stats = [0, 0, 0, 0];
-    allPlayersEntries.forEach(([_, data]) => { if (data.lastChoice >= 0) stats[data.lastChoice]++; });
+    allPlayersEntries.forEach(([_, d]) => { if (d.lastChoice >= 0) stats[d.lastChoice]++; });
     stats.forEach((count, i) => {
         const bar = document.getElementById(`bar-${i}`);
         const countTxt = document.getElementById(`count-${i}`);
@@ -261,36 +297,55 @@ db.ref('players').on('value', snap => {
         if (countTxt) countTxt.innerText = count;
     });
 
-    const fullRankHtml = sortedPlayers.map(([n, d], i) => `
+    // 3. Вывод рейтинга (ВСЕХ ИГРОКОВ, даже с 0 баллов)
+    const podiumHtml = sortedPlayers.map(([n, d], i) => `
         <div class="podium-row ${i === 0 && d.score > 0 ? 'place-1' : ''}">
             <span>${i + 1}. ${n}</span>
             <b>${d.score}</b>
         </div>
-    `).join('') || "<div class='tag'>Ждем игроков...</div>";
+    `).join('') || "<div class='tag'>Ждем первого игрока...</div>";
 
-    document.getElementById('round-leaderboard').innerHTML = fullRankHtml;
-    document.getElementById('podium-final').innerHTML = fullRankHtml;
+    const roundLeaderboard = document.getElementById('round-leaderboard');
+    if (roundLeaderboard) roundLeaderboard.innerHTML = podiumHtml;
+    
+    const podiumFinal = document.getElementById('podium-final');
+    if (podiumFinal) podiumFinal.innerHTML = podiumHtml;
+
+    // 4. Счетчик ответов на экране вопроса
+    const ansCountDisplay = document.getElementById('ans-count');
+    const actualAnswers = allPlayersEntries.filter(([_, d]) => d.lastChoice !== undefined && d.lastChoice !== -1).length;
+    if (ansCountDisplay) ansCountDisplay.innerText = actualAnswers;
 });
 
 // ==========================================
-// 6. ЭФФЕКТЫ
+// 6. ВИЗУАЛЬНЫЕ ЭФФЕКТЫ
 // ==========================================
 
 function createConfetti() {
-    for (let i = 0; i < 80; i++) {
+    for (let i = 0; i < 100; i++) {
         const c = document.createElement('div');
         c.className = 'confetti';
         c.style.left = Math.random() * 100 + 'vw';
         c.style.backgroundColor = ['#ff3366','#2de2e2','#f8e71c','#7ed321','#ffffff'][Math.floor(Math.random()*5)];
+        c.style.width = Math.random() * 12 + 6 + 'px';
+        c.style.height = c.style.width;
         document.body.appendChild(c);
-        c.animate([{ top: '-10%', transform: 'rotate(0deg)' }, { top: '110%', transform: 'rotate(720deg)' }], { duration: 2500 + Math.random() * 3000, iterations: Infinity });
+        c.animate([
+            { top: '-10%', transform: 'rotate(0deg)' },
+            { top: '110%', transform: 'rotate(720deg)' }
+        ], { 
+            duration: 2000 + Math.random() * 3000, 
+            iterations: Infinity 
+        });
     }
 }
 
 function showDonation() {
     const modal = document.getElementById('bread-modal');
-    if(modal) modal.style.display = 'flex';
+    if (modal) modal.style.display = 'flex';
 }
 
 if (state.myNick && state.myNick !== "undefined") User.renderIdentity();
-window.User = User; window.Admin = Admin;
+
+window.User = User; 
+window.Admin = Admin;
