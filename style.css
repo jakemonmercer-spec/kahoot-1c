@@ -1,63 +1,318 @@
+/* 1. ПЕРЕМЕННЫЕ И НАСТРОЙКИ (Core) */
 :root {
-    --bg: #46178f; --red: #e21b3c; --blue: #1368ce; 
-    --gold: #d89e00; --green: #26890c; --white: #ffffff;
-    --glass: rgba(255, 255, 255, 0.15);
+    --bg-purple: #46178f;
+    --accent-yellow: #ffcc00;
+    --red: #e21b3c;
+    --blue: #1368ce;
+    --yellow: #d89e00;
+    --green: #26890c;
+    --white: #ffffff;
+    --dark: #111111;
+    --glass: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --font-main: 'Montserrat', sans-serif;
 }
 
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Montserrat', sans-serif; }
+/* 2. СБРОС И БАЗА */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent; /* Убирает синюю рамку при нажатии на мобилках */
+    user-select: none; /* Запрет выделения текста, чтобы не мешало в игре */
+}
 
-body { margin: 0; background: var(--bg); color: var(--white); height: 100vh; overflow: hidden; }
+html, body {
+    height: 100%;
+    width: 100%;
+    background-color: var(--bg-purple);
+    color: var(--white);
+    font-family: var(--font-main);
+    overflow: hidden; /* Запрет скролла всего окна */
+}
 
-/* Адаптивный Админ-бар */
+/* 3. АДМИН-ПАНЕЛЬ (Адаптированная) */
 #admin-pwa-bar {
-    background: #000; padding: 8px; display: flex; justify-content: center;
-    gap: 10px; border-bottom: 2px solid #ffcc00; font-size: 14px;
+    height: 50px;
+    background: #000;
+    border-bottom: 2px solid var(--accent-yellow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+    position: relative;
+    z-index: 1000;
 }
-#admin-pwa-bar button { border: none; padding: 5px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; }
-.primary { background: var(--green); color: white; }
+
+#admin-pwa-bar input[type="password"] {
+    width: 70px;
+    padding: 5px;
+    font-size: 14px;
+    border-radius: 4px;
+    border: none;
+    margin-right: 5px;
+}
+
+#admin-pwa-bar button {
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-weight: 800;
+    cursor: pointer;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.primary { background: var(--green); color: white; margin: 0 5px; }
 .danger { background: #444; color: #ff5555; }
+.a-btn { background: #f0f0f0; color: #000; }
 
-/* Контейнер экранов */
-.screen { 
-    display: none; width: 100%; height: calc(100vh - 50px); 
-    flex-direction: column; align-items: center; padding: 20px; text-align: center;
-}
-.screen.active { display: flex; animation: fadeIn 0.3s ease; }
-
-/* Лобби */
-.k-logo { font-size: clamp(3rem, 10vw, 5.5rem); font-weight: 800; margin: 2vh 0; }
-.glass-card { background: var(--white); padding: 30px; border-radius: 18px; width: 100%; max-width: 380px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
-.glass-card input { width: 100%; padding: 15px; font-size: 20px; border: 2px solid #eee; border-radius: 10px; margin-bottom: 15px; text-align: center; }
-.btn-hit { width: 100%; background: #333; color: white; padding: 16px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 1.2rem; }
-
-#player-tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 20px; overflow-y: auto; width: 100%; }
-.tag { background: var(--glass); border: 1px solid rgba(255,255,255,0.3); padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 14px; }
-
-/* Геймплей */
-.question-overlay { background: var(--white); color: #000; width: 100vw; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); position: absolute; top: 50px; left: 0; }
-.game-hud { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 900px; margin-top: 100px; padding: 20px; }
-.timer-orb { font-size: 40px; font-weight: 800; border: 5px solid white; width: 85px; height: 85px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); }
-
-.answers-grid { 
-    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; 
-    width: 100%; max-width: 1100px; flex: 1; margin-bottom: 15px;
-}
-.ans-btn { border: none; border-radius: 10px; color: white; font-size: clamp(1.1rem, 3vw, 1.6rem); font-weight: 700; display: flex; align-items: center; padding: 0 25px; cursor: pointer; transition: transform 0.1s; }
-.ans-btn:active { transform: scale(0.96); }
-.ans-btn.r { background: var(--red); } .ans-btn.b { background: var(--blue); }
-.ans-btn.y { background: var(--gold); } .ans-btn.g { background: var(--green); }
-.s { font-size: 2.2rem; margin-right: 15px; opacity: 0.8; }
-
-/* Пьедестал */
-.podium-row { background: var(--glass); width: 100%; max-width: 500px; padding: 18px; margin: 6px; border-radius: 12px; display: flex; justify-content: space-between; font-size: 1.3rem; border-left: 8px solid #fff; }
-
-/* Мобильная адаптация */
-@media (max-width: 600px) {
-    .answers-grid { grid-template-columns: 1fr; grid-template-rows: repeat(4, 1fr); }
-    .ans-btn { padding: 10px 20px; }
-    .timer-orb { width: 65px; height: 65px; font-size: 28px; }
-    .question-overlay h2 { font-size: 1.1rem; }
+/* 4. ГЛАВНЫЙ КОНТЕЙНЕР ЭКРАНОВ */
+#app-viewport {
+    height: calc(100dvh - 50px); /* Используем dvh для идеальной высоты на мобилках */
+    width: 100%;
+    position: relative;
 }
 
-@keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
-@keyframes pop { from {transform: scale(0.8);} to {transform: scale(1);} }
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none; /* По умолчанию скрыты */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    text-align: center;
+}
+
+.screen.active {
+    display: flex; /* Показывается только активный экран */
+    animation: screenFadeIn 0.4s ease-out;
+}
+
+/* 5. ЭКРАН ЛОББИ */
+.k-logo {
+    font-size: clamp(2.5rem, 12vw, 5rem);
+    font-weight: 900;
+    margin-bottom: 2vh;
+    letter-spacing: -2px;
+}
+
+.glass-card {
+    background: var(--white);
+    padding: 25px;
+    border-radius: 15px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+}
+
+.glass-card input {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1rem;
+    border: 2px solid #eee;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    text-align: center;
+    color: #333;
+}
+
+.btn-hit {
+    width: 100%;
+    background: var(--dark);
+    color: var(--white);
+    padding: 16px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 900;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+#online-counter { margin-top: 20px; font-size: 14px; opacity: 0.8; }
+
+#player-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 15px;
+    overflow-y: auto;
+    max-height: 20vh;
+}
+
+.tag {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 13px;
+    animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* 6. ЭКРАН ИГРЫ (Вопрос) */
+.question-overlay {
+    background: var(--white);
+    color: #000;
+    width: 100%;
+    padding: clamp(15px, 4vh, 30px);
+    position: fixed;
+    top: 50px;
+    left: 0;
+    z-index: 50;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.question-overlay h2 {
+    font-size: clamp(1rem, 4vw, 1.8rem);
+    line-height: 1.2;
+}
+
+.game-hud {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1000px;
+    margin-top: 120px; /* Отступ от шапки вопроса */
+    margin-bottom: 20px;
+}
+
+.timer-orb {
+    font-size: 32px;
+    font-weight: 900;
+    border: 4px solid var(--white);
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.3);
+}
+
+.stats-pill {
+    background: rgba(0,0,0,0.4);
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-weight: 700;
+}
+
+/* 7. СЕТКА ОТВЕТОВ (Самая важная часть) */
+.answers-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* По умолчанию 2 колонки (ПК) */
+    grid-template-rows: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+    max-width: 1100px;
+    flex: 1; /* Растягиваем на всю доступную высоту */
+    margin-bottom: 10px;
+}
+
+.ans-btn {
+    border: none;
+    border-radius: 8px;
+    color: var(--white);
+    font-size: clamp(1rem, 3vw, 1.5rem);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    cursor: pointer;
+    transition: filter 0.1s, transform 0.1s;
+    text-align: left;
+}
+
+.ans-btn:active { transform: scale(0.97); filter: brightness(1.2); }
+
+.ans-btn.r { background: var(--red); }
+.ans-btn.b { background: var(--blue); }
+.ans-btn.y { background: var(--yellow); }
+.ans-btn.g { background: var(--green); }
+
+.ans-btn .s {
+    font-size: 2.2rem;
+    margin-right: 15px;
+    opacity: 0.8;
+}
+
+/* 8. ЭКРАНЫ РЕЗУЛЬТАТОВ */
+.feedback-card {
+    background: var(--white);
+    color: #000;
+    padding: 30px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+}
+
+.podium-row {
+    background: var(--glass);
+    width: 100%;
+    max-width: 500px;
+    padding: 15px 20px;
+    margin: 6px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    font-size: clamp(1rem, 4vw, 1.4rem);
+    border-left: 10px solid var(--accent-yellow);
+    animation: slideIn 0.4s ease-out both;
+}
+
+/* 9. МОБИЛЬНАЯ АДАПТАЦИЯ (Small Screens) */
+@media (max-width: 700px) {
+    .answers-grid {
+        grid-template-columns: 1fr; /* 1 колонка на мобилках */
+        grid-template-rows: repeat(4, 1fr);
+    }
+    
+    .ans-btn {
+        padding: 5px 15px;
+    }
+
+    .game-hud {
+        margin-top: 100px;
+    }
+
+    .timer-orb {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+    }
+}
+
+/* 10. АНИМАЦИИ */
+@keyframes screenFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pop {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.pulse {
+    animation: pulseAnim 1.5s infinite alternate;
+}
+
+@keyframes pulseAnim {
+    from { opacity: 0.6; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Скроллбар для списка игроков */
+#player-tags::-webkit-scrollbar { width: 4px; }
+#player-tags::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
