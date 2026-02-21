@@ -1,37 +1,42 @@
-/* 1. ШРИФТЫ И ОСНОВА */
+/* 1. ПЕРЕМЕННЫЕ И ШРИФТЫ */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap');
 
 :root {
-    --bg-purple: #46178f;
+    --bg: #46178f;
     --accent: #ffcc00;
-    --red: #e21b3c;
-    --blue: #1368ce;
-    --yellow: #ffa600;
-    --green: #26890c;
+    --r: #e21b3c;
+    --b: #1368ce;
+    --y: #ffa600;
+    --g: #26890c;
     --white: #ffffff;
     --dark: #111111;
-    --font: 'Montserrat', sans-serif;
-    --shadow-btn: 0 6px 0 rgba(0,0,0,0.2);
+    --glass: rgba(255, 255, 255, 0.12);
+    --font-main: 'Montserrat', sans-serif;
 }
 
+/* 2. ГЛОБАЛЬНЫЙ СБРОС И ЗАЩИТА ОТ ЗУМА */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    /* Запрет системных жестов на кнопках, чтобы не увеличивалось при частом нажатии */
+    touch-action: manipulation; 
     -webkit-tap-highlight-color: transparent;
-    user-select: none;
+    -webkit-font-smoothing: antialiased;
 }
 
 html, body {
+    /* Фиксация высоты: dvh учитывает панель навигации в Safari/Chrome */
     height: 100dvh;
     width: 100%;
-    background-color: var(--bg-purple);
+    background-color: var(--bg);
     color: var(--white);
-    font-family: var(--font);
-    overflow: hidden; /* Весь сайт не скроллится, только списки внутри */
+    font-family: var(--font-main);
+    overflow: hidden; /* Запрет общего скролла страницы */
+    position: fixed; /* Дополнительная фиксация от "резинового" скролла на iPhone */
 }
 
-/* 2. АДМИН-ПАНЕЛЬ (УПРАВЛЕНИЕ) */
+/* 3. АДМИН-ПАНЕЛЬ (Компактная) */
 #admin-pwa-bar {
     height: 50px;
     background: #000;
@@ -41,21 +46,22 @@ html, body {
     justify-content: center;
     padding: 0 10px;
     z-index: 9999;
-    position: relative;
 }
 
 #admin-pwa-bar input {
-    width: 70px;
-    padding: 5px;
+    width: 65px;
+    padding: 6px;
     font-size: 14px;
     border-radius: 4px;
     border: none;
     text-align: center;
+    background: #222;
+    color: white;
 }
 
 #admin-pwa-bar button {
     border: none;
-    padding: 6px 12px;
+    padding: 8px 12px;
     border-radius: 4px;
     font-weight: 800;
     cursor: pointer;
@@ -64,10 +70,10 @@ html, body {
     margin-left: 5px;
 }
 
-.primary { background: var(--green); color: white; }
-.danger { background: #333; color: var(--red); }
+.primary { background: var(--g); color: white; }
+.danger { background: #333; color: var(--r); }
 
-/* 3. КОНТЕЙНЕР ЭКРАНОВ */
+/* 4. ОСНОВНОЙ КОНТЕЙНЕР ЭКРАНОВ */
 #app-viewport {
     height: calc(100dvh - 50px);
     width: 100%;
@@ -81,38 +87,38 @@ html, body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: clamp(10px, 4vw, 30px);
 }
 
 .screen.active {
     display: flex;
-    animation: fadeIn 0.4s ease-out;
+    animation: fadeIn 0.3s ease-out;
 }
 
-/* 4. ЛОББИ И ВХОД */
+/* 5. ЭКРАН ЛОББИ */
 .k-logo {
-    font-size: clamp(2.5rem, 12vw, 6rem);
+    font-size: clamp(2rem, 10vw, 5.5rem);
     font-weight: 900;
-    margin-bottom: 20px;
-    text-shadow: 4px 4px rgba(0,0,0,0.3);
+    margin-bottom: 2vh;
+    text-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 
 .glass-card {
     background: var(--white);
-    padding: clamp(20px, 5vw, 40px);
-    border-radius: 20px;
+    padding: clamp(15px, 5vw, 35px);
+    border-radius: 18px;
     width: 100%;
-    max-width: 400px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    max-width: 360px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
 }
 
 .glass-card input {
     width: 100%;
-    padding: 18px;
-    font-size: 1.2rem;
+    padding: 15px;
+    font-size: 1.1rem;
     border: 2px solid #eee;
-    border-radius: 12px;
-    margin-bottom: 15px;
+    border-radius: 10px;
+    margin-bottom: 12px;
     text-align: center;
     color: #333;
     font-weight: 800;
@@ -122,52 +128,56 @@ html, body {
     width: 100%;
     background: var(--dark);
     color: var(--white);
-    padding: 20px;
+    padding: 18px;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     font-weight: 900;
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     cursor: pointer;
-    box-shadow: 0 6px 0 #000;
+    box-shadow: 0 5px 0 #000;
     transition: 0.1s;
 }
 
-.btn-hit:active { transform: translateY(4px); box-shadow: 0 2px 0 #000; }
+.btn-hit:active { transform: translateY(3px); box-shadow: 0 2px 0 #000; }
 
-/* 5. СПИСКИ ИГРОКОВ (SCROLLABLE) */
 #player-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px;
     justify-content: center;
-    margin-top: 25px;
-    overflow-y: auto; /* Скролл для большого кол-ва игроков */
-    max-height: 30vh;
+    margin-top: 20px;
+    overflow-y: auto;
+    max-height: 25vh;
     width: 100%;
-    padding: 15px;
+    padding: 10px;
 }
 
 .tag {
-    background: rgba(255,255,255,0.2);
-    border: 2px solid rgba(255,255,255,0.1);
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: 800;
-    font-size: 1.2rem;
-    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background: var(--glass);
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-weight: 600;
+    font-size: 14px;
+    animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* 6. ЭКРАН ВОПРОСА */
+/* 6. ЭКРАН ВОПРОСА (Адаптация под челки и вырезы) */
 .question-overlay {
     background: var(--white);
     color: #000;
     width: 100%;
-    padding: 25px;
+    padding: clamp(10px, 3vh, 25px);
     position: fixed;
     top: 50px;
     left: 0;
     z-index: 100;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.question-overlay h2 {
+    font-size: clamp(0.9rem, 4.5vw, 1.6rem);
+    font-weight: 800;
 }
 
 .game-hud {
@@ -175,164 +185,165 @@ html, body {
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    max-width: 1100px;
-    margin-top: 150px;
-    margin-bottom: 20px;
+    max-width: 900px;
+    margin-top: clamp(100px, 20vh, 150px);
+    margin-bottom: 15px;
 }
 
 .timer-orb {
-    font-size: 3rem;
+    font-size: clamp(1.8rem, 8vw, 3rem);
     font-weight: 900;
-    width: 100px;
-    height: 100px;
-    border: 8px solid var(--white);
+    width: clamp(70px, 15vw, 95px);
+    height: clamp(70px, 15vw, 95px);
+    border: 6px solid var(--white);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0,0,0,0.3);
+    background: rgba(0,0,0,0.2);
 }
 
 .stats-pill {
-    background: rgba(0,0,0,0.5);
-    padding: 12px 25px;
-    border-radius: 40px;
-    font-weight: 800;
-    font-size: 1.2rem;
+    background: rgba(0,0,0,0.4);
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.9rem;
 }
 
-/* 7. КНОПКИ ОТВЕТОВ (GRID) */
+/* 7. СЕТКА КНОПОК (Smart Grid) */
 .answers-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
-    gap: 12px;
+    gap: 8px;
     width: 100%;
-    max-width: 1200px;
+    max-width: 1100px;
     flex: 1;
-    margin-bottom: 10px;
+    margin-bottom: env(safe-area-inset-bottom, 10px); /* Учет низа iPhone */
 }
 
 .ans-btn {
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     color: var(--white);
-    font-size: clamp(1rem, 3vw, 1.7rem);
+    font-size: clamp(0.9rem, 3.5vw, 1.5rem);
     font-weight: 800;
     display: flex;
     align-items: center;
-    padding: 0 35px;
+    padding: 0 20px;
     cursor: pointer;
-    box-shadow: var(--shadow-btn);
+    box-shadow: 0 5px 0 rgba(0,0,0,0.15);
     transition: 0.1s;
-    text-align: left;
 }
 
-.ans-btn:active { transform: translateY(4px); box-shadow: none; filter: brightness(1.2); }
+.ans-btn.r { background: var(--r); }
+.ans-btn.b { background: var(--b); }
+.ans-btn.y { background: var(--y); }
+.ans-btn.g { background: var(--g); }
 
-.ans-btn.r { background: var(--red); }
-.ans-btn.b { background: var(--blue); }
-.ans-btn.y { background: var(--yellow); }
-.ans-btn.g { background: var(--green); }
+.ans-btn:active { transform: translateY(3px); box-shadow: none; filter: brightness(1.15); }
 
-.ans-btn .s { font-size: 3.5rem; margin-right: 25px; opacity: 0.8; }
+.ans-btn .s { font-size: clamp(2rem, 7vw, 3.5rem); margin-right: 15px; opacity: 0.7; }
 
-/* 8. СТАТИСТИКА И РЕЙТИНГ (Результаты раунда) */
+/* 8. СТАТИСТИКА (Столбики) */
+.stat-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+
+.bar {
+    width: 100%;
+    max-width: 40px;
+    min-height: 4px;
+    border-radius: 5px 5px 0 0;
+    transition: height 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.r-bar { background: var(--r); } .b-bar { background: var(--b); }
+.y-bar { background: var(--y); } .g-bar { background: var(--g); }
+
 .feedback-card {
     background: var(--white);
     color: #000;
-    padding: 25px;
+    padding: clamp(15px, 4vh, 30px);
     border-radius: 20px;
     width: 100%;
-    max-width: 500px;
-    margin-bottom: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    max-width: 450px;
+    margin-bottom: 15px;
 }
 
-.stats-container {
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    gap: 20px;
-    height: 140px;
-    margin-top: 15px;
+/* 9. СПИСКИ (Scroll Zones) */
+.scroll-list {
+    width: 100%;
+    max-width: 500px;
+    overflow-y: auto;
+    max-height: 40vh;
+    padding: 5px;
 }
 
 .podium-row {
     background: rgba(255,255,255,0.15);
     width: 100%;
-    max-width: 550px;
-    padding: 15px 25px;
-    margin: 8px 0;
-    border-radius: 12px;
+    padding: 12px 20px;
+    margin: 6px 0;
+    border-radius: 10px;
     display: flex;
     justify-content: space-between;
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     font-weight: 800;
-    border-left: 10px solid var(--accent);
-    animation: slideIn 0.5s ease-out both;
+    border-left: 6px solid var(--accent);
+    animation: slideIn 0.4s ease-out both;
 }
 
-.place-1 { 
-    background: linear-gradient(45deg, #ffd700, #ff8c00) !important; 
-    color: #000; 
-    transform: scale(1.05);
-    border: none;
-}
+.place-1 { background: linear-gradient(45deg, #ffd700, #ff8c00) !important; color: #000; border: none; }
 
-#round-leaderboard, #podium-final {
-    overflow-y: auto;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-/* 9. МОБИЛЬНАЯ АДАПТАЦИЯ (iPhone / Android) */
-@media (max-width: 700px) {
+/* 10. АДАПТАЦИЯ (iPhone SE / Small Android) */
+@media (max-width: 650px) {
     .answers-grid {
-        grid-template-columns: 1fr; /* Одна кнопка на всю ширину */
+        grid-template-columns: 1fr; /* Одна колонка на мобилках */
         grid-template-rows: repeat(4, 1fr);
     }
-    
-    .ans-btn { height: 18vh; min-height: 70px; padding: 0 20px; }
-    .ans-btn .s { font-size: 2.2rem; margin-right: 15px; }
-    .game-hud { margin-top: 120px; }
-    .timer-orb { width: 75px; height: 75px; font-size: 2rem; }
-    .k-logo { font-size: 3.5rem; }
+    .ans-btn { height: 12vh; min-height: 55px; }
+    .ans-btn .s { font-size: 1.8rem; }
+    .game-hud { margin-top: 100px; }
+    .timer-orb { width: 60px; height: 60px; font-size: 1.8rem; border-width: 4px; }
 }
 
-/* 10. АНИМАЦИИ И ЭФФЕКТЫ */
+/* 11. АНИМАЦИИ */
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-@keyframes slideIn { from { transform: translateX(-40px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes pop { 0% { transform: scale(0.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes slideIn { from { transform: translateX(-30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-.pulse { animation: pulse 1.5s infinite alternate; }
-@keyframes pulse { from { transform: scale(1); } to { transform: scale(1.08); } }
+.pulse { animation: pulseAnim 1.2s infinite alternate; }
+@keyframes pulseAnim { 
+    from { transform: scale(1); opacity: 1; } 
+    to { transform: scale(1.06); opacity: 0.8; } 
+}
 
 .player-identity {
     position: fixed;
-    bottom: 10px;
+    bottom: env(safe-area-inset-bottom, 10px);
     right: 10px;
     background: var(--white);
     color: #000;
-    padding: 8px 20px;
-    border-radius: 30px;
+    padding: 6px 15px;
+    border-radius: 20px;
     font-weight: 900;
-    font-size: 14px;
-    z-index: 2000;
+    font-size: 12px;
+    z-index: 5000;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    border: 2px solid var(--bg-purple);
 }
 
 .confetti {
     position: absolute;
-    width: 12px; height: 12px;
-    z-index: 999;
+    width: 10px; height: 10px;
+    z-index: 998;
     pointer-events: none;
-    border-radius: 2px;
+    border-radius: 1px;
 }
 
-/* Стилизация скроллбара */
-::-webkit-scrollbar { width: 6px; }
+/* Кастомный скроллбар */
+::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
