@@ -1,68 +1,37 @@
-:root {
-    --purple: #46178f; --red: #e21b3c; --blue: #1368ce; 
-    --yellow: #d89e00; --green: #26890c; --white: #ffffff;
-}
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
 
 body {
     font-family: 'Montserrat', sans-serif;
-    background: var(--purple);
-    margin: 0; color: white; text-align: center;
+    background-color: #46178f;
+    margin: 0;
+    color: white;
 }
 
-/* Кнопки как в Kahoot */
-.answers-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px; padding: 20px;
-    height: 30vh;
-}
-
-.ans-btn {
-    border: none; border-radius: 4px;
-    color: white; font-size: 28px; font-weight: bold;
-    display: flex; align-items: center; padding-left: 30px;
-    cursor: pointer; transition: 0.1s;
-}
-
-.ans-btn.r { background: var(--red); }
-.ans-btn.b { background: var(--blue); }
-.ans-btn.y { background: var(--yellow); }
-.ans-btn.g { background: var(--green); }
-
-.shape { font-size: 45px; margin-right: 20px; }
-
-/* Таймер */
-#timer-val {
-    background: white; color: black;
-    width: 80px; height: 80px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 32px; font-weight: bold;
-}
-
-.main-area {
-    display: flex; justify-content: space-around; align-items: center;
-    height: 40vh;
-}
-
-.image-placeholder img { max-height: 250px; border-radius: 10px; }
+.screen { padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
 
 /* Лобби */
-.card {
-    background: white; padding: 30px; border-radius: 10px;
-    width: 300px; margin: 50px auto;
-}
+.kahoot-logo { font-size: 48px; margin: 40px 0; text-shadow: 2px 2px 10px rgba(0,0,0,0.5); }
+.card { background: white; padding: 20px; border-radius: 10px; display: flex; flex-direction: column; width: 300px; gap: 10px; }
+input { padding: 15px; border: 1px solid #ccc; border-radius: 5px; font-size: 18px; text-align: center; }
+.join-btn { background: #333; color: white; padding: 15px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
 
-input {
-    width: 100%; padding: 15px; font-size: 18px;
-    border: 2px solid #ccc; margin-bottom: 15px; box-sizing: border-box;
-}
+#player-list { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 20px; justify-content: center; }
+.player-tag { background: rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 5px; font-size: 20px; }
 
-.join-btn {
-    width: 100%; background: #333; color: white;
-    padding: 15px; border: none; font-weight: bold; cursor: pointer;
-}
+/* Экран вопроса */
+.q-header { background: white; color: black; width: 100%; padding: 20px; text-align: center; box-sizing: border-box; }
+.main-area { display: flex; width: 100%; justify-content: space-around; align-items: center; flex: 1; padding: 20px; }
+#timer-val { font-size: 48px; border: 5px solid white; border-radius: 50%; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; }
+.answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; padding: 10px; box-sizing: border-box; }
 
-.admin-panel {
-    position: fixed; bottom: 0; width: 100%;
-    background: rgba(0,0,0,0.8); padding: 10px;
-}
+.ans-btn { height: 120px; border: none; border-radius: 5px; color: white; font-size: 24px; font-weight: bold; cursor: pointer; display: flex; align-items: center; padding: 0 30px; gap: 20px; transition: transform 0.1s; }
+.ans-btn:hover { transform: scale(1.02); }
+.ans-btn.r { background: #e21b3c; }
+.ans-btn.b { background: #1368ce; }
+.ans-btn.y { background: #d89e00; }
+.ans-btn.g { background: #26890c; }
+.shape { font-size: 40px; }
+
+/* Админка */
+.admin-panel { background: rgba(0,0,0,0.9); padding: 15px; position: fixed; bottom: 0; width: 100%; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.admin-panel button { padding: 10px; cursor: pointer; font-weight: bold; }
