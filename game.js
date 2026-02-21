@@ -1,36 +1,73 @@
 // ==========================================
-// 1. ДАННЫЕ И КОНСТАНТЫ (Лабораторная №6)
+// 1. ДАННЫЕ И ВОПРОСЫ (Лабораторная №6 + База 1С)
 // ==========================================
 
 const QUIZ_DATA = [
+    // --- Вопросы из Лабораторной №6 ---
     { 
-        q: "Для чего предназначен объект 'Отчет' в 1С?", 
-        a: ["Для ввода новых данных в базу", "Для анализа и вывода сводной информации", "Для хранения списка всех сотрудников", "Для удаления старых записей"], 
+        q: "Для чего предназначен объект конфигурации «Отчет»?", 
+        a: ["Для хранения паролей", "Для анализа данных и создания сводных таблиц", "Для ввода новых сотрудников", "Для удаления базы"], 
         c: 1 
     },
     { 
-        q: "Какой основной инструмент используется в 6-й лабе для создания отчета?", 
-        a: ["Макет оформления", "Конструктор форм", "СКД (Система компоновки данных)", "Модуль объекта"], 
+        q: "Как создать отчет с помощью конструктора без написания кода?", 
+        a: ["Через Модуль объекта", "Использовать Макет", "Через СКД (Схему компоновки данных)", "Написать в блокноте"], 
         c: 2 
     },
     { 
-        q: "Какую виртуальную таблицу мы выбрали в Конструкторе запроса?", 
-        a: ["Остатки", "Обороты", "ОстаткиИОбороты", "Продажи"], 
-        c: 2 
-    },
-    { 
-        q: "Зачем в настройках СКД добавляется группировка 'Детальные записи'?", 
-        a: ["Чтобы скрыть итоги", "Для вывода подробных строк (Склад, Товар)", "Для защиты отчета паролем", "Это техническая ошибка"], 
+        q: "Что такое виртуальная таблица «ОстаткиИОбороты»?", 
+        a: ["Список всех картинок", "Таблица, которая сама считает приход, расход и остатки", "Архив старых документов", "Таблица для чата"], 
         c: 1 
     },
     { 
-        q: "Что нужно сделать, чтобы пользователь мог сам менять даты отчета в '1С:Предприятие'?", 
-        a: ["Включить параметры в 'Пользовательские настройки'", "Изменить длину кода справочника", "Переименовать подсистему", "Написать код на языке C++"], 
+        q: "Какие поля критически важны для отчета «Материалы»?", 
+        a: ["Цвет и Размер", "Склад, Материал, Остатки и Обороты", "Имя директора и телефон", "Адрес магазина"], 
+        c: 1 
+    },
+    { 
+        q: "Для чего нужны параметры «Начало периода» и «Конец периода»?", 
+        a: ["Для красоты", "Чтобы ограничить отчет по датам (задать период)", "Для регистрации пользователя", "Для ускорения интернета"], 
+        c: 1 
+    },
+    { 
+        q: "Как сделать так, чтобы команда отчета появилась в меню программы?", 
+        a: ["Создать ярлык на рабочем столе", "Отметить нужные разделы на вкладке «Подсистемы»", "Написать письмо в техподдержку", "Просто сохранить файл"], 
+        c: 1 
+    },
+    { 
+        q: "Какую кнопку нужно нажать в 1С, чтобы отчет вывел данные на экран?", 
+        a: ["«Сформировать»", "«Пуск»", "«Записать и закрыть»", "«Провести»"], 
         c: 0 
+    },
+    // --- Банально простые вопросы про 1С ---
+    { 
+        q: "Как называется компания-разработчик системы «1С:Предприятие»?", 
+        a: ["1С", "Microsoft", "Google", "Apple"], 
+        c: 0 
+    },
+    { 
+        q: "Какой основной цвет логотипа и интерфейса 1С?", 
+        a: ["Синий", "Желтый / Оранжевый", "Зеленый", "Черный"], 
+        c: 1 
+    },
+    { 
+        q: "Как называется режим, в котором программист создает структуру базы?", 
+        a: ["Игровой режим", "Конфигуратор", "1С:Предприятие", "Браузер"], 
+        c: 1 
+    },
+    { 
+        q: "В каком объекте 1С хранятся списки товаров или клиентов?", 
+        a: ["Справочники", "Документы", "Регистры", "Константы"], 
+        c: 0 
+    },
+    { 
+        q: "Какой объект в 1С фиксирует событие (например, факт продажи)?", 
+        a: ["Отчет", "Документ", "Макет", "Стиль"], 
+        c: 1 
     }
 ];
 
-// Список 30 животных для автоматического присвоения имен опоздавшим
+// Список 30 животных для автоматического присвоения имен
 const ANIMAL_NAMES = [
     "Мудрый Кот", "Быстрый Гепард", "Сонная Панда", "Грозный Тигр", "Хитрый Лис", 
     "Смелый Лев", "Тихий Волк", "Веселый Енот", "Гордый Орел", "Умный Сова",
@@ -40,7 +77,6 @@ const ANIMAL_NAMES = [
     "Зоркий Сокол", "Могучий Лось", "Пятнистый Жираф", "Речной Выдра", "Горный Козел"
 ];
 
-// Глобальное состояние системы
 let state = {
     myNick: localStorage.getItem('quiz_nick') || "",
     currentQIdx: -1,
@@ -49,7 +85,7 @@ let state = {
     serverOffset: 0
 };
 
-// Синхронизация времени с серверами Google для устранения NaN
+// Синхронизация времени с серверами Google
 db.ref('.info/serverTimeOffset').on('value', snap => {
     state.serverOffset = snap.val() || 0;
 });
@@ -64,29 +100,16 @@ const User = {
         
         let nameToUse = forcedNick || (document.getElementById('p-nick') ? document.getElementById('p-nick').value.trim() : "");
         
-        // Если имя пустое (опоздал или не ввел) - генерируем случайное животное
         if (!nameToUse) {
             const randomAnimal = ANIMAL_NAMES[Math.floor(Math.random() * ANIMAL_NAMES.length)];
-            nameToUse = randomAnimal + " " + Math.floor(Math.random() * 99);
+            nameToUse = randomAnimal + " #" + Math.floor(Math.random() * 100);
         }
         
-        // Защита: ник никогда не должен быть строкой "undefined"
-        if (nameToUse === "undefined") {
-            nameToUse = "Студент " + Math.floor(Math.random() * 100);
-        }
-
         state.myNick = nameToUse;
         localStorage.setItem('quiz_nick', state.myNick);
 
-        // Гарантированно создаем запись игрока в базе со всеми полями
         const playerRef = db.ref('players/' + state.myNick);
-        await playerRef.set({ 
-            score: 0, 
-            lastChoice: -1,
-            lastActive: firebase.database.ServerValue.TIMESTAMP 
-        });
-
-        // Контроль активности (удаление при выходе)
+        await playerRef.set({ score: 0, lastChoice: -1, lastActive: firebase.database.ServerValue.TIMESTAMP });
         playerRef.onDisconnect().remove();
 
         if (typeof SoundEngine !== 'undefined') SoundEngine.playTap();
@@ -101,28 +124,20 @@ const User = {
         let idTag = document.getElementById('player-id') || document.createElement('div');
         idTag.id = 'player-id';
         idTag.className = 'player-identity';
-        idTag.innerText = `Игрок: ${state.myNick}`;
+        idTag.innerText = `Вы: ${state.myNick}`;
         if (!document.getElementById('player-id')) document.body.appendChild(idTag);
     },
 
     hit(idx) {
-        // Если ника нет или клик запрещен - ничего не делаем
-        if (!state.canHit || !state.myNick || state.myNick === "undefined") return;
+        if (!state.canHit || !state.myNick) return;
         state.canHit = false;
-        
         if (typeof SoundEngine !== 'undefined') SoundEngine.playTap();
         document.getElementById('ans-grid').style.opacity = "0.3";
-
-        // Сохраняем выбор в базу для статистики графиков
         db.ref('players/' + state.myNick + '/lastChoice').set(idx);
 
-        // Проверка правильности
         if (idx === QUIZ_DATA[state.currentQIdx].c) {
             let timerEl = document.getElementById('timer-sec');
             let timeLeft = timerEl ? parseInt(timerEl.innerText) : 0;
-            if (isNaN(timeLeft)) timeLeft = 0;
-
-            // Расчет баллов (база + время)
             let points = 500 + (timeLeft * 25);
             db.ref('players/' + state.myNick + '/score').transaction(s => (s || 0) + points);
             if (typeof SoundEngine !== 'undefined') SoundEngine.playCorrect();
@@ -138,51 +153,33 @@ const User = {
 
 const Admin = {
     login() {
-        const pinVal = document.getElementById('pin') ? document.getElementById('pin').value : "";
+        const pinVal = document.getElementById('pin')?.value;
         if (pinVal === "123") {
             document.getElementById('auth-lock').style.display = 'none';
             document.getElementById('adm-tools').style.display = 'flex';
         }
     },
 
-    setStep(step) { db.ref('game').update({ step: step }); },
-
     async runAuto() {
-        // Очистка базы от ошибок перед началом
         await db.ref('players/undefined').remove();
-
         for (let i = 0; i < QUIZ_DATA.length; i++) {
-            // Обнуляем выборы игроков перед новым вопросом
             const playersSnap = await db.ref('players').once('value');
             const updates = {};
             playersSnap.forEach(child => { updates[`players/${child.key}/lastChoice`] = -1; });
             await db.ref().update(updates);
 
-            // 1. Приготовьтесь
-            await db.ref('game').set({ 
-                step: 'getready', 
-                qIdx: i, 
-                serverStartTime: firebase.database.ServerValue.TIMESTAMP 
-            });
+            await db.ref('game').set({ step: 'getready', qIdx: i, serverStartTime: firebase.database.ServerValue.TIMESTAMP });
             await new Promise(r => setTimeout(r, 4000));
-
-            // 2. Вопрос
-            await db.ref('game').update({ 
-                step: 'game',
-                serverStartTime: firebase.database.ServerValue.TIMESTAMP 
-            });
+            await db.ref('game').update({ step: 'game', serverStartTime: firebase.database.ServerValue.TIMESTAMP });
             await new Promise(r => setTimeout(r, 21000));
-
-            // 3. Результаты и статистика
             await db.ref('game').update({ step: 'results' });
             await new Promise(r => setTimeout(r, 6000));
         }
-        // ФИНАЛЬНЫЙ ПОДИУМ
         db.ref('game').update({ step: 'podium' });
     },
 
     reset() {
-        if (confirm("ПОЛНЫЙ СБРОС ВСЕХ ДАННЫХ?")) {
+        if (confirm("ПОЛНЫЙ СБРОС ВСЕГО?")) {
             db.ref('/').set({ game: { step: 'lobby', qIdx: -1 }, players: {} });
             localStorage.clear();
             location.reload();
@@ -191,28 +188,21 @@ const Admin = {
 };
 
 // ==========================================
-// 4. СИНХРОНИЗАЦИЯ ТАЙМЕРА (БЕЗ NaN)
+// 4. СИНХРОНИЗАЦИЯ ТАЙМЕРА
 // ==========================================
 
 function startSyncTimer(startTime) {
     clearInterval(state.syncTimer);
     if (!startTime) return;
-
     state.syncTimer = setInterval(() => {
-        const nowServer = Date.now() + state.serverOffset;
-        const elapsed = Math.floor((nowServer - startTime) / 1000);
+        const elapsed = Math.floor(((Date.now() + state.serverOffset) - startTime) / 1000);
         let left = 20 - elapsed;
         if (left < 0) left = 0;
-        
         const el = document.getElementById('timer-sec');
         if (el) {
             el.innerText = isNaN(left) ? "20" : left;
             if (left <= 5 && left > 0 && typeof SoundEngine !== 'undefined') SoundEngine.playTick();
-            if (left === 0) {
-                state.canHit = false;
-                document.getElementById('ans-grid').style.opacity = "0.3";
-                clearInterval(state.syncTimer);
-            }
+            if (left === 0) { state.canHit = false; document.getElementById('ans-grid').style.opacity = "0.3"; clearInterval(state.syncTimer); }
         }
     }, 1000);
 }
@@ -225,12 +215,8 @@ db.ref('game').on('value', snap => {
     const g = snap.val() || { step: 'lobby', qIdx: -1 };
     state.currentQIdx = g.qIdx;
 
-    // АВТО-ВХОД ДЛЯ ОПОЗДАВШИХ: если игрок зашел в середине игры
-    if (!state.myNick && g.step !== 'lobby') {
-        User.join(); 
-    }
+    if (!state.myNick && g.step !== 'lobby') { User.join(); }
 
-    // Смена экранов
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     const target = document.getElementById('view-' + g.step);
     if (target) target.classList.add('active');
@@ -246,66 +232,48 @@ db.ref('game').on('value', snap => {
         }
         startSyncTimer(g.serverStartTime);
     }
-    
     if (g.step === 'podium') {
         if (typeof SoundEngine !== 'undefined') SoundEngine.playFanfare();
         createConfetti();
     }
 });
 
-// ГЛАВНЫЙ СЛУШАТЕЛЬ ИГРОКОВ (Статистика + Отображение всех)
+// Слушатель игроков
 db.ref('players').on('value', snap => {
     const pData = snap.val() || {};
-    // Чистка ошибок
     if (pData.undefined) db.ref('players/undefined').remove();
 
-    const allPlayersEntries = Object.entries(pData).filter(([name]) => name !== "undefined" && name !== "");
+    const allPlayersEntries = Object.entries(pData).filter(([name]) => name !== "undefined");
     const sortedPlayers = [...allPlayersEntries].sort((a, b) => b[1].score - a[1].score);
     
-    // 1. Лобби (Отображаем абсолютно ВСЕХ)
     const lobby = document.getElementById('player-tags');
-    if (lobby) {
-        lobby.innerHTML = allPlayersEntries.map(([n]) => `<div class="tag">${n}</div>`).join('');
-    }
+    if (lobby) lobby.innerHTML = allPlayersEntries.map(([n]) => `<div class="tag">${n}</div>`).join('');
     
-    const counter = document.getElementById('online-counter');
-    if (counter) counter.innerText = `${allPlayersEntries.length} студентов в игре`;
+    document.getElementById('online-counter').innerText = `${allPlayersEntries.length} студентов онлайн`;
 
-    // 2. Статистика (Графики ответов)
+    // Статистика графиков
     let stats = [0, 0, 0, 0];
-    allPlayersEntries.forEach(([_, data]) => {
-        if (data.lastChoice >= 0) stats[data.lastChoice]++;
-    });
+    allPlayersEntries.forEach(([_, data]) => { if (data.lastChoice >= 0) stats[data.lastChoice]++; });
     stats.forEach((count, i) => {
         const bar = document.getElementById(`bar-${i}`);
         const countTxt = document.getElementById(`count-${i}`);
-        if (bar) bar.style.height = (count * 15) + "px"; 
+        if (bar) bar.style.height = (count * 15 + 5) + "px"; 
         if (countTxt) countTxt.innerText = count;
     });
 
-    // 3. ГЕНЕРАЦИЯ РЕЙТИНГА (Все игроки, независимо от баллов)
-    const fullListHtml = sortedPlayers.map(([n, d], i) => `
+    const fullRankHtml = sortedPlayers.map(([n, d], i) => `
         <div class="podium-row ${i === 0 && d.score > 0 ? 'place-1' : ''}">
             <span>${i + 1}. ${n}</span>
             <b>${d.score}</b>
         </div>
-    `).join('') || "<div class='tag'>Ожидание участников...</div>";
+    `).join('') || "<div class='tag'>Ждем игроков...</div>";
 
-    // Вывод в оба контейнера
-    const leaderboardBox = document.getElementById('round-leaderboard');
-    if (leaderboardBox) leaderboardBox.innerHTML = fullListHtml;
-    
-    const finalPodiumBox = document.getElementById('podium-final');
-    if (finalPodiumBox) finalPodiumBox.innerHTML = fullListHtml;
-
-    // Счетчик ответов на экране
-    const ansCountDisplay = document.getElementById('ans-count');
-    const actualAnswers = allPlayersEntries.filter(([_, d]) => d.lastChoice >= 0).length;
-    if (ansCountDisplay) ansCountDisplay.innerText = actualAnswers;
+    document.getElementById('round-leaderboard').innerHTML = fullRankHtml;
+    document.getElementById('podium-final').innerHTML = fullRankHtml;
 });
 
 // ==========================================
-// 6. ВИЗУАЛЬНЫЕ ЭФФЕКТЫ
+// 6. ЭФФЕКТЫ
 // ==========================================
 
 function createConfetti() {
@@ -314,23 +282,15 @@ function createConfetti() {
         c.className = 'confetti';
         c.style.left = Math.random() * 100 + 'vw';
         c.style.backgroundColor = ['#ff3366','#2de2e2','#f8e71c','#7ed321','#ffffff'][Math.floor(Math.random()*5)];
-        c.style.width = Math.random() * 12 + 6 + 'px';
-        c.style.height = c.style.width;
         document.body.appendChild(c);
-        c.animate([
-            { top: '-10%', transform: 'rotate(0deg)' },
-            { top: '110%', transform: 'rotate(720deg)' }
-        ], { 
-            duration: 2000 + Math.random() * 3000, 
-            iterations: Infinity 
-        });
+        c.animate([{ top: '-10%', transform: 'rotate(0deg)' }, { top: '110%', transform: 'rotate(720deg)' }], { duration: 2500 + Math.random() * 3000, iterations: Infinity });
     }
 }
 
-// Инициализация при загрузке
-if (state.myNick && state.myNick !== "undefined") {
-    User.renderIdentity();
+function showDonation() {
+    const modal = document.getElementById('bread-modal');
+    if(modal) modal.style.display = 'flex';
 }
 
-// Привязка объектов к глобальному окну
+if (state.myNick && state.myNick !== "undefined") User.renderIdentity();
 window.User = User; window.Admin = Admin;
