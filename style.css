@@ -1,177 +1,173 @@
-/* 1. ПЕРЕМЕННЫЕ И НАСТРОЙКИ (Core) */
+/* 1. Глобальные настройки и шрифты */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap');
+
 :root {
-    --bg-purple: #46178f;
-    --accent-yellow: #ffcc00;
-    --red: #e21b3c;
-    --blue: #1368ce;
-    --yellow: #d89e00;
-    --green: #26890c;
-    --white: #ffffff;
+    --bg: #46178f; /* Kahoot Purple */
+    --r: #e21b3c;  /* Красный */
+    --b: #1368ce;  /* Синий */
+    --y: #ffa600;  /* Золотой */
+    --g: #26890c;  /* Зеленый */
+    --w: #ffffff;
     --dark: #111111;
-    --glass: rgba(255, 255, 255, 0.1);
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --font-main: 'Montserrat', sans-serif;
+    --font: 'Montserrat', sans-serif;
+    --shadow: 0 8px 0 rgba(0,0,0,0.2);
 }
 
-/* 2. СБРОС И БАЗА */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    -webkit-tap-highlight-color: transparent; /* Убирает синюю рамку при нажатии на мобилках */
-    user-select: none; /* Запрет выделения текста, чтобы не мешало в игре */
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
 }
 
 html, body {
-    height: 100%;
+    height: 100dvh; /* Dynamic Viewport Height для мобилок */
     width: 100%;
-    background-color: var(--bg-purple);
-    color: var(--white);
-    font-family: var(--font-main);
-    overflow: hidden; /* Запрет скролла всего окна */
+    background-color: var(--bg);
+    color: var(--w);
+    font-family: var(--font);
+    overflow: hidden;
 }
 
-/* 3. АДМИН-ПАНЕЛЬ (Адаптированная) */
+/* 2. Админ-панель (Тонкая полоса сверху) */
 #admin-pwa-bar {
-    height: 50px;
+    height: 45px;
     background: #000;
-    border-bottom: 2px solid var(--accent-yellow);
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0 10px;
-    position: relative;
     z-index: 1000;
+    position: relative;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
-#admin-pwa-bar input[type="password"] {
-    width: 70px;
-    padding: 5px;
-    font-size: 14px;
+#admin-pwa-bar input {
+    width: 60px;
+    height: 25px;
+    font-size: 12px;
     border-radius: 4px;
     border: none;
-    margin-right: 5px;
+    text-align: center;
+    margin-right: 10px;
 }
 
 #admin-pwa-bar button {
     border: none;
-    padding: 6px 12px;
+    padding: 5px 12px;
     border-radius: 4px;
     font-weight: 800;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 10px;
     text-transform: uppercase;
+    transition: 0.2s;
 }
 
-.primary { background: var(--green); color: white; margin: 0 5px; }
-.danger { background: #444; color: #ff5555; }
-.a-btn { background: #f0f0f0; color: #000; }
+.primary { background: var(--g); color: white; margin-right: 5px; }
+.danger { background: #333; color: var(--r); }
 
-/* 4. ГЛАВНЫЙ КОНТЕЙНЕР ЭКРАНОВ */
+/* 3. Оболочка приложения */
 #app-viewport {
-    height: calc(100dvh - 50px); /* Используем dvh для идеальной высоты на мобилках */
+    height: calc(100dvh - 45px);
     width: 100%;
     position: relative;
 }
 
 .screen {
     position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
-    display: none; /* По умолчанию скрыты */
+    display: none;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 15px;
+    padding: 20px;
     text-align: center;
 }
 
 .screen.active {
-    display: flex; /* Показывается только активный экран */
-    animation: screenFadeIn 0.4s ease-out;
+    display: flex;
 }
 
-/* 5. ЭКРАН ЛОББИ */
+/* 4. Лобби (Экран входа) */
 .k-logo {
-    font-size: clamp(2.5rem, 12vw, 5rem);
+    font-size: clamp(2.5rem, 15vw, 6rem);
     font-weight: 900;
-    margin-bottom: 2vh;
-    letter-spacing: -2px;
+    margin-top: 5vh;
+    animation: float 3s ease-in-out infinite;
 }
 
 .glass-card {
-    background: var(--white);
-    padding: 25px;
-    border-radius: 15px;
+    background: var(--w);
+    padding: clamp(20px, 5vw, 40px);
+    border-radius: clamp(15px, 3vw, 25px);
     width: 100%;
-    max-width: 380px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    max-width: 400px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    margin-top: 4vh;
 }
 
 .glass-card input {
     width: 100%;
-    padding: 15px;
-    font-size: 1.1rem;
+    padding: clamp(12px, 3vw, 20px);
+    font-size: 1.2rem;
     border: 2px solid #eee;
-    border-radius: 8px;
-    margin-bottom: 12px;
+    border-radius: 10px;
+    margin-bottom: 15px;
     text-align: center;
     color: #333;
+    font-weight: 600;
 }
 
 .btn-hit {
     width: 100%;
-    background: var(--dark);
-    color: var(--white);
-    padding: 16px;
+    background: #333;
+    color: var(--w);
+    padding: 18px;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     font-weight: 900;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     cursor: pointer;
-    transition: transform 0.1s;
+    box-shadow: 0 6px 0 #000;
+    transition: 0.1s;
 }
 
-#online-counter { margin-top: 20px; font-size: 14px; opacity: 0.8; }
+.btn-hit:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #000;
+}
 
 #player-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 10px;
     justify-content: center;
-    margin-top: 15px;
+    margin-top: 30px;
     overflow-y: auto;
-    max-height: 20vh;
+    max-height: 25vh;
+    padding: 10px;
 }
 
 .tag {
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    padding: 6px 12px;
-    border-radius: 4px;
-    font-weight: 600;
-    font-size: 13px;
-    animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background: rgba(255,255,255,0.2);
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 800;
+    font-size: 1.1rem;
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
 }
 
-/* 6. ЭКРАН ИГРЫ (Вопрос) */
+/* 5. Экран Вопроса */
 .question-overlay {
-    background: var(--white);
+    background: var(--w);
     color: #000;
     width: 100%;
-    padding: clamp(15px, 4vh, 30px);
+    padding: 25px;
     position: fixed;
-    top: 50px;
+    top: 45px;
     left: 0;
-    z-index: 50;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-}
-
-.question-overlay h2 {
-    font-size: clamp(1rem, 4vw, 1.8rem);
-    line-height: 1.2;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
 .game-hud {
@@ -179,140 +175,136 @@ html, body {
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    max-width: 1000px;
-    margin-top: 120px; /* Отступ от шапки вопроса */
-    margin-bottom: 20px;
+    max-width: 1100px;
+    margin-top: 130px;
+    padding: 20px;
 }
 
 .timer-orb {
-    font-size: 32px;
+    font-size: clamp(2rem, 8vw, 3.5rem);
     font-weight: 900;
-    border: 4px solid var(--white);
-    width: 70px;
-    height: 70px;
+    width: clamp(80px, 20vw, 110px);
+    height: clamp(80px, 20vw, 110px);
+    border: 8px solid var(--w);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0,0,0,0.3);
+    background: rgba(0,0,0,0.2);
 }
 
-.stats-pill {
-    background: rgba(0,0,0,0.4);
-    padding: 10px 20px;
-    border-radius: 30px;
-    font-weight: 700;
-}
-
-/* 7. СЕТКА ОТВЕТОВ (Самая важная часть) */
 .answers-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* По умолчанию 2 колонки (ПК) */
-    grid-template-rows: 1fr 1fr;
-    gap: 10px;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
     width: 100%;
-    max-width: 1100px;
-    flex: 1; /* Растягиваем на всю доступную высоту */
+    max-width: 1200px;
+    flex: 1;
     margin-bottom: 10px;
 }
 
 .ans-btn {
     border: none;
-    border-radius: 8px;
-    color: var(--white);
-    font-size: clamp(1rem, 3vw, 1.5rem);
-    font-weight: 700;
+    border-radius: 12px;
+    color: var(--w);
+    font-size: clamp(1rem, 4vw, 1.8rem);
+    font-weight: 800;
     display: flex;
     align-items: center;
-    padding: 0 20px;
+    padding: 0 30px;
     cursor: pointer;
-    transition: filter 0.1s, transform 0.1s;
+    box-shadow: var(--shadow);
     text-align: left;
+    position: relative;
+    overflow: hidden;
+    animation: slideUp 0.5s ease both;
 }
 
-.ans-btn:active { transform: scale(0.97); filter: brightness(1.2); }
+.ans-btn.r { background: var(--r); animation-delay: 0.1s; }
+.ans-btn.b { background: var(--b); animation-delay: 0.2s; }
+.ans-btn.y { background: var(--y); animation-delay: 0.3s; }
+.ans-btn.g { background: var(--g); animation-delay: 0.4s; }
 
-.ans-btn.r { background: var(--red); }
-.ans-btn.b { background: var(--blue); }
-.ans-btn.y { background: var(--yellow); }
-.ans-btn.g { background: var(--green); }
+.ans-btn:active { transform: translateY(4px); box-shadow: none; filter: brightness(1.2); }
 
-.ans-btn .s {
-    font-size: 2.2rem;
-    margin-right: 15px;
-    opacity: 0.8;
-}
+.ans-btn .s { font-size: 3rem; margin-right: 20px; opacity: 0.8; }
 
-/* 8. ЭКРАНЫ РЕЗУЛЬТАТОВ */
-.feedback-card {
-    background: var(--white);
+/* 6. Персональный индикатор Имени */
+.player-identity {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    background: var(--w);
     color: #000;
-    padding: 30px;
-    border-radius: 20px;
-    margin-bottom: 20px;
+    padding: 10px 25px;
+    font-weight: 900;
+    border-radius: 0 15px 0 0;
+    z-index: 100;
+    box-shadow: 5px -5px 15px rgba(0,0,0,0.2);
 }
 
-.podium-row {
-    background: var(--glass);
+/* 7. Конфетти и Победа */
+#podium-final {
     width: 100%;
-    max-width: 500px;
-    padding: 15px 20px;
-    margin: 6px;
-    border-radius: 10px;
+    max-width: 600px;
+    margin-top: 30px;
+}
+
+.winner-row {
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.2);
+    margin: 10px 0;
+    padding: 20px;
+    border-radius: 15px;
     display: flex;
     justify-content: space-between;
-    font-size: clamp(1rem, 4vw, 1.4rem);
-    border-left: 10px solid var(--accent-yellow);
-    animation: slideIn 0.4s ease-out both;
+    font-size: 1.5rem;
+    font-weight: 800;
+    animation: winnerPop 0.5s ease-out both;
 }
 
-/* 9. МОБИЛЬНАЯ АДАПТАЦИЯ (Small Screens) */
-@media (max-width: 700px) {
-    .answers-grid {
-        grid-template-columns: 1fr; /* 1 колонка на мобилках */
-        grid-template-rows: repeat(4, 1fr);
-    }
-    
-    .ans-btn {
-        padding: 5px 15px;
-    }
+.place-1 { background: linear-gradient(45deg, #ffd700, #ff8c00); color: #000; border: none; transform: scale(1.1); margin-bottom: 20px; }
 
-    .game-hud {
-        margin-top: 100px;
-    }
-
-    .timer-orb {
-        width: 60px;
-        height: 60px;
-        font-size: 24px;
-    }
+/* 8. Адаптация под маленькие телефоны */
+@media (max-width: 600px) {
+    .answers-grid { grid-template-columns: 1fr; }
+    .ans-btn { height: 75px; padding: 0 15px; }
+    .ans-btn .s { font-size: 2rem; }
+    .game-hud { margin-top: 110px; }
 }
 
-/* 10. АНИМАЦИИ */
-@keyframes screenFadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+/* 9. Анимации */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
 }
 
-@keyframes pop {
-    0% { transform: scale(0.5); opacity: 0; }
+@keyframes popIn {
+    0% { transform: scale(0); opacity: 0; }
     100% { transform: scale(1); opacity: 1; }
 }
 
-@keyframes slideIn {
-    from { transform: translateX(-20px); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
+@keyframes slideUp {
+    0% { transform: translateY(100px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
 }
 
-.pulse {
-    animation: pulseAnim 1.5s infinite alternate;
+@keyframes winnerPop {
+    0% { transform: translateX(-50px); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
 }
 
+.pulse { animation: pulseAnim 1s infinite alternate; }
 @keyframes pulseAnim {
-    from { opacity: 0.6; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
+    from { transform: scale(1); }
+    to { transform: scale(1.05); }
 }
 
-/* Скроллбар для списка игроков */
-#player-tags::-webkit-scrollbar { width: 4px; }
-#player-tags::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
+/* Конфетти-частица (для JS вызова) */
+.confetti {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    z-index: 999;
+    pointer-events: none;
+}
