@@ -1,4 +1,4 @@
-// 1. ДАННЫЕ
+// 1. ДАННЫЕ ВОПРОСОВ
 const QUIZ_DATA = [
     { q: "Для чего предназначен объект 'Отчет' в 1С?", a: ["Для ввода данных", "Для анализа и вывода сводной информации", "Для хранения списка сотрудников", "Для удаления записей"], c: 1 },
     { q: "Какой инструмент используется в 6-й лабе для создания отчета без кода?", a: ["Макет оформления", "Конструктор форм", "СКД (Система компоновки данных) ", "Модуль объекта"], c: 2 },
@@ -7,14 +7,20 @@ const QUIZ_DATA = [
     { q: "Что позволяет пользователю менять даты отчета в режиме '1С:Предприятие'?", a: ["Параметры в 'Пользовательских настройках'", "Длина кода справочника", "Имя подсистемы", "Кнопка СБРОС"], c: 0 }
 ];
 
-const ANIMAL_NAMES = ["Мудрый Кот", "Быстрарый Гепард", "Сонная Панда", "Грозный Тигр", "Хитрый Лис", "Смелый Лев", "Тихий Волк", "Веселый Енот", "Гордый Орел", "Умный Сова"];
+const ANIMAL_NAMES = ["Мудрый Кот", "Быстрый Гепард", "Сонная Панда", "Грозный Тигр", "Хитрый Лис", "Смелый Лев", "Тихий Волк", "Веселый Енот", "Гордый Орел", "Умный Сова"];
 
 let state = {
     myNick: localStorage.getItem('quiz_nick') || "",
     currentQIdx: -1,
     canHit: false,
-    syncTimer: null
+    syncTimer: null,
+    serverOffset: 0
 };
+
+// Получаем разницу во времени с сервером Google один раз при загрузке
+db.ref('.info/serverTimeOffset').on('value', (snap) => {
+    state.serverOffset = snap.val() || 0;
+});
 
 // --- ЛОГИКА ИГРОКА ---
 const User = {
@@ -22,20 +28,18 @@ const User = {
         SoundEngine.init();
         let input = document.getElementById('p-nick').value.trim();
         
-        // Защита от пустого имени и undefined
         if (!input && !state.myNick) {
             input = ANIMAL_NAMES[Math.floor(Math.random() * ANIMAL_NAMES.length)];
         }
         
         state.myNick = input || state.myNick;
-        if (state.myNick === "undefined" || !state.myNick) return; // Жесткий стоп
+        if (state.myNick === "undefined" || !state.myNick) return;
 
         localStorage.setItem('quiz_nick', state.myNick);
 
         const playerRef = db.ref('players/' + state.myNick);
-        await playerRef.update({ score: 0, lastActive: Date.now() });
-        
-        // Авто-удаление при дисконнекте
+        // lastActive поможет нам видеть "живых" игроков
+        await playerRef.update({ score: 0, lastActive: firebase.database.ServerValue.TIMESTAMP });
         playerRef.onDisconnect().remove();
 
         SoundEngine.playTap();
@@ -53,7 +57,6 @@ const User = {
     },
 
     hit(idx) {
-        // Если ника нет — запрещаем клик (защита от ghost player)
         if (!state.canHit || !state.myNick || state.myNick === "undefined") return;
         
         state.canHit = false;
@@ -61,7 +64,9 @@ const User = {
         document.getElementById('ans-grid').style.opacity = "0.3";
 
         if (idx === QUIZ_DATA[state.currentQIdx].c) {
-            let timeLeft = parseInt(document.getElementById('timer-sec').innerText);
+            let timerVal = parseInt(document.getElementById('timer-sec').innerText);
+            // Если таймер сломался, даем базу в 500 баллов
+            let timeLeft = isNaN(timerVal) ? 0 : timerVal; 
             let points = 500 + (timeLeft * 25);
             db.ref('players/' + state.myNick + '/score').transaction(s => (s || 0) + points);
             SoundEngine.playCorrect();
@@ -81,32 +86,32 @@ const Admin = {
     },
 
     async runAuto() {
-        // При запуске очищаем старые призраки undefined из базы
+        // Чистим мусор перед стартом
         await db.ref('players/undefined').remove();
 
         for (let i = 0; i < QUIZ_DATA.length; i++) {
-            // Устанавливаем время начала вопроса по серверу
-            await db.ref('game').update({ 
+            // Устанавливаем и шаг, и время старта ОДНИМ обновлением для синхронности
+            await db.ref('game').set({ 
                 step: 'getready', 
                 qIdx: i, 
                 serverStartTime: firebase.database.ServerValue.TIMESTAMP 
             });
-            await new Promise(r => setTimeout(r, 3000));
+            await new Promise(r => setTimeout(r, 4000)); // 4 сек на подготовку
 
             await db.ref('game').update({ 
                 step: 'game',
                 serverStartTime: firebase.database.ServerValue.TIMESTAMP 
             });
-            await new Promise(r => setTimeout(r, 20500));
+            await new Promise(r => setTimeout(r, 21000)); // 21 сек на вопрос
 
             await db.ref('game').update({ step: 'results' });
-            await new Promise(r => setTimeout(r, 5000));
+            await new Promise(r => setTimeout(r, 5000)); // 5 сек на результаты
         }
         db.ref('game').update({ step: 'podium' });
     },
 
     reset() {
-        if (confirm("Полный сброс базы?")) {
+        if (confirm("ВНИМАНИЕ: Это удалит всех игроков и баллы. Продолжить?")) {
             db.ref('/').set({ game: { step: 'lobby', qIdx: -1 }, players: {} });
             localStorage.clear();
             location.reload();
@@ -114,54 +119,63 @@ const Admin = {
     }
 };
 
-// --- СИНХРОНИЗАЦИЯ ТАЙМЕРА (Серверное время) ---
-function syncTimer(serverStart) {
+// --- ИСПРАВЛЕННЫЙ СИНХРОННЫЙ ТАЙМЕР ---
+function startSyncTimer(startTime) {
     clearInterval(state.syncTimer);
     
-    // Получаем смещение времени сервера относительно телефона
-    db.ref('.info/serverTimeOffset').once('value', (snap) => {
-        const offset = snap.val();
-        
-        state.syncTimer = setInterval(() => {
-            const nowServer = Date.now() + offset;
-            const elapsed = Math.floor((nowServer - serverStart) / 1000);
-            let left = 20 - elapsed;
+    // Если время не пришло с сервера, ставим заглушку 20
+    if (!startTime) {
+        document.getElementById('timer-sec').innerText = "20";
+        return;
+    }
 
-            if (left < 0) left = 0;
+    state.syncTimer = setInterval(() => {
+        const nowServer = Date.now() + state.serverOffset;
+        const elapsed = Math.floor((nowServer - startTime) / 1000);
+        let left = 20 - elapsed;
+
+        if (left < 0) left = 0;
+        
+        const timerEl = document.getElementById('timer-sec');
+        if (timerEl) {
+            // Если left — число, выводим его. Если нет — выводим 20.
+            timerEl.innerText = isNaN(left) ? "20" : left;
             
-            const timerEl = document.getElementById('timer-sec');
-            if (timerEl) {
-                timerEl.innerText = left;
-                if (left <= 5 && left > 0) SoundEngine.playTick();
-                if (left === 0) {
-                    state.canHit = false;
-                    document.getElementById('ans-grid').style.opacity = "0.3";
-                    clearInterval(state.syncTimer);
-                }
+            if (left <= 5 && left > 0) SoundEngine.playTick();
+            if (left === 0) {
+                state.canHit = false;
+                document.getElementById('ans-grid').style.opacity = "0.3";
+                clearInterval(state.syncTimer);
             }
-        }, 1000);
-    });
+        }
+    }, 1000);
 }
 
-// --- СЛУШАТЕЛИ FIREBASE ---
+// --- ЕДИНЫЙ СЛУШАТЕЛЬ СОСТОЯНИЯ ---
 db.ref('game').on('value', snap => {
     const g = snap.val() || { step: 'lobby', qIdx: -1 };
     state.currentQIdx = g.qIdx;
 
+    // Переключение экранов
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     const target = document.getElementById('view-' + g.step);
     if (target) target.classList.add('active');
 
+    // Логика экрана вопроса
     if (g.step === 'game') {
         state.canHit = true;
         document.getElementById('ans-grid').style.opacity = "1";
-        const q = QUIZ_DATA[state.currentQIdx];
-        document.getElementById('q-text').innerText = q.q;
-        const btns = document.querySelectorAll('.ans-btn .t');
-        q.a.forEach((t, i) => { if (btns[i]) btns[i].innerText = t; });
         
-        // Запуск синхронного таймера
-        syncTimer(g.serverStartTime);
+        // Заполняем текст вопроса и кнопок
+        const q = QUIZ_DATA[state.currentQIdx];
+        if (q) {
+            document.getElementById('q-text').innerText = q.q;
+            const btns = document.querySelectorAll('.ans-btn .t');
+            q.a.forEach((t, i) => { if (btns[i]) btns[i].innerText = t; });
+        }
+        
+        // Запуск таймера с защитой от NaN
+        startSyncTimer(g.serverStartTime);
     }
     
     if (g.step === 'podium') {
@@ -170,36 +184,56 @@ db.ref('game').on('value', snap => {
     }
 });
 
+// Слушатель игроков
 db.ref('players').on('value', snap => {
     const p = snap.val() || {};
-    // Удаляем из локального отображения игрока undefined, если он пролез
-    if (p.undefined) delete p.undefined;
+    if (p.undefined) db.ref('players/undefined').remove(); // Чистим на лету
 
-    const sorted = Object.entries(p).sort((a, b) => b[1].score - a[1].score);
+    const sorted = Object.entries(p)
+        .filter(([name]) => name !== "undefined") // Убираем undefined из списка
+        .sort((a, b) => b[1].score - a[1].score);
     
-    document.getElementById('player-tags').innerHTML = sorted.map(([n]) => `<div class="tag">${n}</div>`).join('');
-    document.getElementById('online-counter').innerText = `${Object.keys(p).length} игроков онлайн`;
+    // Обновляем Лобби
+    const lobby = document.getElementById('player-tags');
+    if (lobby) lobby.innerHTML = sorted.map(([n]) => `<div class="tag">${n}</div>`).join('');
+    
+    const counter = document.getElementById('online-counter');
+    if (counter) counter.innerText = `${sorted.length} игроков онлайн`;
 
+    // Обновляем результаты
     const listHtml = sorted.slice(0, 5).map(([n, d], i) => `
-        <div class="winner-row ${i === 0 ? 'place-1' : ''}">
+        <div class="podium-row ${i === 0 ? 'place-1' : ''}">
             <span>${i + 1}. ${n}</span>
             <b>${d.score}</b>
         </div>
     `).join('');
     
-    document.getElementById('round-leaderboard').innerHTML = listHtml;
-    document.getElementById('podium-final').innerHTML = listHtml;
+    const roundBox = document.getElementById('round-leaderboard');
+    if (roundBox) roundBox.innerHTML = listHtml;
+    
+    const finalBox = document.getElementById('podium-final');
+    if (finalBox) finalBox.innerHTML = listHtml;
+
+    // Счетчик ответов (считаем тех, кто онлайн)
+    const ansCounter = document.getElementById('ans-count');
+    if (ansCounter) ansCounter.innerText = sorted.length;
 });
 
 function createConfetti() {
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 60; i++) {
         const c = document.createElement('div');
         c.className = 'confetti';
         c.style.left = Math.random() * 100 + 'vw';
-        c.style.backgroundColor = ['#ff0','#f0f','#0ff','#0f0'][Math.floor(Math.random()*4)];
+        c.style.backgroundColor = ['#ff3366','#2de2e2','#f8e71c','#7ed321'][Math.floor(Math.random()*4)];
         document.body.appendChild(c);
-        c.animate([{ top: '-10%' }, { top: '110%' }], { duration: 3000, iterations: Infinity });
+        c.animate([
+            { top: '-10%', transform: 'rotate(0deg)' },
+            { top: '110%', transform: 'rotate(720deg)' }
+        ], { duration: 2000 + Math.random() * 2000, iterations: Infinity });
     }
 }
 
-if (state.myNick && state.myNick !== "undefined") User.renderIdentity();
+// Восстановление при перезагрузке
+if (state.myNick && state.myNick !== "undefined") {
+    User.renderIdentity();
+}
