@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1C Kahoot - Лабораторная №6</title>
+    <!-- Используем версию COMPAT для стабильности на GitHub Pages -->
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
+    <style>
+        body { font-family: 'Arial', sans-serif; background: #46178f; color: white; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: auto; }
+        .card { background: white; color: #333; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: center; }
+        .btn { display: block; width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: bold; transition: 0.2s; }
+        .btn:active { transform: scale(0.98); }
+        .ans-0 { background: #e21b3c; color: white; } .ans-1 { background: #1368ce; color: white; }
+        .ans-2 { background: #d89e00; color: white; } .ans-3 { background: #26890c; color: white; }
+        #leaderboard { list-style: none; padding: 0; margin-top: 20px; }
+        #leaderboard li { background: rgba(255,255,255,0.1); margin: 5px 0; padding: 10px; border-radius: 5px; display: flex; justify-content: space-between; }
+        .admin-panel { margin-top: 50px; padding: 15px; border: 2px dashed rgba(255,255,255,0.3); border-radius: 10px; background: rgba(0,0,0,0.2); }
+        input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 5px; border: none; box-sizing: border-box; font-size: 16px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>1С: Квиз (Lab 6)</h1>
+
+    <!-- Экран Входа -->
+    <div id="auth-screen" class="card">
+        <h3>Введите ваше имя:</h3>
+        <input type="text" id="username" placeholder="Имя Фамилия">
+        <button class="btn ans-1" onclick="joinGame()">Войти в игру</button>
+    </div>
+
+    <!-- Экран Игры -->
+    <div id="game-screen" style="display:none;">
+        <h2 id="question-text">Ожидание начала...</h2>
+        <div id="answers-container"></div>
+        
+        <div id="results-area">
+            <h4>🏆 Рейтинг студентов:</h4>
+            <ul id="leaderboard"></ul>
+        </div>
+    </div>
+
+    <!-- ПАНЕЛЬ АДМИНИСТРАТОРА (Для тебя) -->
+    <div class="admin-panel" id="admin-ui">
+        <h4>Управление (Только для тебя)</h4>
+        <div id="admin-buttons"></div>
+        <button class="btn" style="background:#333; color:white; font-size: 12px;" onclick="resetGame()">Сбросить игру (Очистить баллы)</button>
+    </div>
+</div>
+
+<script>
+    // ТВОИ ДАННЫЕ ИЗ FIREBASE
+    const firebaseConfig = {
+        apiKey: "AIzaSyBrPKRi5NWA7JRcdbA2YLO4HPR3ULaBlGk",
+        authDomain: "quiz1c.firebaseapp.com",
+        databaseURL: "https://quiz1c-default-rtdb.firebaseio.com",
+        projectId: "quiz1c",
+        storageBucket: "quiz1c.firebasestorage.app",
+        messagingSenderId: "660786627580",
+        appId: "1:660786627580:web:6a552159559d0eef426879"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const questions = [
+        { q: "СКД (Система компоновки данных) деген эмне?", a: ["Отчетторду түзүүчү инструмент", "Программа коду", "Справочник", "Макет"], c: 0 },
+        { q: "Материалы отчетунда кайсы виртуалдык таблица колдонулат?", a: ["Остатки", "Обороты", "ОстаткиИОбороты", "Продажи"], c: 2 },
+        { q: "Отчеттун визуалдык көрүнүшү эмне деп аталат?", a: ["Форма", "Макет", "Запрос", "Ресурс"], c: 1 },
+        { q: "Начало периода кайсы жерде көрсөтүлөт?", a: ["Пользовательские настройки", "Свойства справочника", "Модуль объекта", "Запрос"], c: 0 },
+        { q: "Запрос конструкторунда «>>» баскычы эмне кылат?", a: ["Баарын өчүрөт", "Бардык талааларды тандайт", "Отчетту жабат", "Кодду текшерет"], c: 1 }
+    ];
+
+    let myName = "";
+
+    function joinGame() {
+        myName = document.getElementById('username').value.trim();
+        if (!myName) return alert("Введите имя!");
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('game-screen').style.display = 'block';
+        db.ref('players/' + myName).set({ score: 0 });
+        initRealtime();
+    }
+
+    function initRealtime() {
+        db.ref('currentQuestion').on('value', (snap) => {
+            const qIdx = snap.val();
+            if (qIdx === null || qIdx === -1) {
+                renderWaiting();
+            } else {
+                renderQuestion(qIdx);
+            }
+        });
+
+        db.ref('players').on('value', (snap) => {
+            const players = snap.val() || {};
+            const list = document.getElementById('leaderboard');
+            list.innerHTML = "";
+            const sorted = Object.entries(players).sort((a,b) => b[1].score - a[1].score);
+            sorted.forEach(([name, data]) => {
+                list.innerHTML += `<li><span>${name}</span> <b>${data.score}</b></li>`;
+            });
+        });
+    }
+
+    function renderWaiting() {
+        document.getElementById('question-text').innerText = "Ожидаем вопроса от преподавателя...";
+        document.getElementById('answers-container').innerHTML = "";
+    }
+
+    function renderQuestion(idx) {
+        const q = questions[idx];
+        document.getElementById('question-text').innerText = q.q;
+        const container = document.getElementById('answers-container');
+        container.innerHTML = "";
+        q.a.forEach((ans, i) => {
+            container.innerHTML += `<button class="btn ans-${i}" onclick="checkAns(${idx}, ${i})">${ans}</button>`;
+        });
+    }
+
+    function checkAns(qIdx, ansIdx) {
+        if (ansIdx === questions[qIdx].c) {
+            db.ref('players/' + myName + '/score').transaction(s => (s || 0) + 100);
+            alert("Туура! +100");
+        } else {
+            alert("Ката!");
+        }
+        document.getElementById('answers-container').innerHTML = "<h4>Жооп кабыл алынды. Кийинкини күтө туруңуз...</h4>";
+    }
+
+    // Кнопки управления для тебя
+    const adminButtons = document.getElementById('admin-buttons');
+    questions.forEach((q, i) => {
+        const b = document.createElement('button');
+        b.innerText = "Вопрос " + (i+1);
+        b.className = "btn ans-1";
+        b.style.fontSize = "14px";
+        b.onclick = () => db.ref('currentQuestion').set(i);
+        adminButtons.appendChild(b);
+    });
+
+    function resetGame() {
+        if(confirm("Сбросить рейтинг?")) {
+            db.ref('/').set({ currentQuestion: -1, players: {} });
+            location.reload();
+        }
+    }
+</script>
+</body>
+</html>
