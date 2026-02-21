@@ -80,10 +80,23 @@
     function joinGame() {
         myName = document.getElementById('username').value.trim();
         if (!myName) return alert("Введите имя!");
-        document.getElementById('auth-screen').style.display = 'none';
-        document.getElementById('game-screen').style.display = 'block';
-        db.ref('players/' + myName).set({ score: 0 });
-        initRealtime();
+
+        const playerRef = db.ref('players/' + myName);
+
+        playerRef.once('value').then((snapshot) => {
+            if (snapshot.exists()) {
+                alert("С возвращением, " + myName + "!");
+            } else {
+                playerRef.set({ score: 0 });
+            }
+
+            // Удаление при выходе
+            playerRef.onDisconnect().remove();
+
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            initRealtime();
+        });
     }
 
     function initRealtime() {
@@ -132,7 +145,6 @@
         document.getElementById('answers-container').innerHTML = "<h4>Жооп кабыл алынды. Кийинкини күтө туруңуз...</h4>";
     }
 
-    // Кнопки управления для тебя
     const adminButtons = document.getElementById('admin-buttons');
     questions.forEach((q, i) => {
         const b = document.createElement('button');
@@ -144,8 +156,9 @@
     });
 
     function resetGame() {
-        if(confirm("Сбросить рейтинг?")) {
-            db.ref('/').set({ currentQuestion: -1, players: {} });
+        if(confirm("Выгнать всех игроков и обнулить рейтинг?")) {
+            db.ref('players').remove();
+            db.ref('currentQuestion').set(-1);
             location.reload();
         }
     }
