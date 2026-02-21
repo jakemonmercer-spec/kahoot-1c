@@ -1,4 +1,3 @@
-// Конфигурация Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyBrPKRi5NWA7JRcdbA2YLO4HPR3ULaBlGk",
     authDomain: "quiz1c.firebaseapp.com",
@@ -9,6 +8,5 @@ const firebaseConfig = {
     appId: "1:660786627580:web:6a552159559d0eef426879"
 };
 
-// Инициализация
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
