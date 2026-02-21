@@ -3,18 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>1C:Enterprise Quiz Pro</title>
+    <title>1С: Квиз - Лабораторная №6</title>
     
-    <!-- Подключение стилей и шрифтов -->
+    <!-- Подключение внешнего многотонного файла стилей -->
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
     
-    <!-- Firebase SDK (Версия Compat для стабильной работы на GitHub Pages) -->
+    <!-- Библиотеки Firebase (Compat версия для максимальной стабильности) -->
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
 
     <script>
-        // ИНИЦИАЛИЗАЦИЯ БАЗЫ ДАННЫХ (ЯДРО)
+        // --- КОНФИГУРАЦИЯ FIREBASE (ЯДРО ПРИВЯЗКИ) ---
         const firebaseConfig = {
             apiKey: "AIzaSyBrPKRi5NWA7JRcdbA2YLO4HPR3ULaBlGk",
             authDomain: "quiz1c.firebaseapp.com",
@@ -26,56 +25,62 @@
             measurementId: "G-JYTEXXW2BD"
         };
 
-        // Запуск Firebase ПЕРЕД загрузкой интерфейса
+        // Инициализация базы данных мгновенно при чтении файла
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
     </script>
 </head>
 <body>
 
-    <!-- ПАНЕЛЬ УПРАВЛЕНИЯ ПРЕПОДАВАТЕЛЯ -->
+    <!-- АДМИН-ПАНЕЛЬ (Полоса сверху для управления) -->
     <nav id="admin-pwa-bar">
         <div id="auth-lock">
-            <input type="password" id="pin" placeholder="PIN">
-            <button onclick="Admin.login()">Unlock</button>
+            <input type="password" id="pin" placeholder="ПИН">
+            <button onclick="Admin.login()">Войти</button>
         </div>
         <div id="adm-tools" style="display:none;">
-            <button class="a-btn" onclick="Admin.setStep('lobby')">LOBBY</button>
-            <button class="a-btn primary" onclick="Admin.runAuto()">AUTO START</button>
-            <button class="a-btn danger" onclick="Admin.reset()">RESET</button>
-            <span id="game-status" style="margin-left:10px; font-size:10px; color:#ffcc00;">Online</span>
+            <button class="a-btn" onclick="Admin.setStep('lobby')">ЛОББИ</button>
+            <button class="a-btn primary" onclick="Admin.runAuto()">АВТО-СТАРТ</button>
+            <button class="a-btn danger" onclick="Admin.reset()">СБРОС БАЗЫ</button>
+            <span style="color:#ffcc00; font-size:10px; margin-left:10px;">• ADMIN LIVE</span>
         </div>
     </nav>
 
+    <!-- ОСНОВНОЙ КОНТЕЙНЕР ПРИЛОЖЕНИЯ -->
     <div id="app-viewport">
         
         <!-- ЭКРАН 1: ЛОББИ (Вход в игру) -->
         <section id="view-lobby" class="screen active">
             <div class="k-logo">1C: Quiz</div>
+            
             <div id="join-card" class="glass-card">
                 <input type="text" id="p-nick" placeholder="Твое имя...">
                 <button onclick="User.join()" class="btn-hit">ИГРАТЬ</button>
             </div>
-            <div id="online-counter">0 игроков онлайн</div>
+            
+            <div id="online-counter">Подключение к серверу...</div>
+            
             <div id="player-tags">
-                <!-- Сюда JS будет рендерить ники вошедших студентов -->
+                <!-- Сюда JS отрисует ники вошедших (и реальных, и "животных") -->
             </div>
         </section>
 
-        <!-- ЭКРАН 2: ОЖИДАНИЕ (Get Ready) -->
+        <!-- ЭКРАН 2: ПРИГОТОВЬТЕСЬ (Countdown между вопросами) -->
         <section id="view-getready" class="screen">
-            <h1 class="prep-text pulse">ПРИГОТОВЬТЕСЬ...</h1>
-            <div class="user-score-bubble" id="p-score-now">Баллы: 0</div>
+            <h1 class="pulse" style="font-size: 3rem;">ПРИГОТОВЬТЕСЬ!</h1>
+            <div id="player-score-info" class="winner-row" style="background: white; color: black; margin-top: 20px;">
+                Скоро начнется следующий вопрос...
+            </div>
         </section>
 
         <!-- ЭКРАН 3: ВОПРОС (Game) -->
         <section id="view-game" class="screen">
             <div class="question-overlay">
-                <h2 id="q-text">Загрузка вопроса...</h2>
+                <h2 id="q-text">Загрузка вопроса по Лабораторной №6...</h2>
             </div>
             
             <div class="game-hud">
-                <div class="timer-orb" id="t-orb">
+                <div class="timer-orb">
                     <span id="timer-sec">20</span>
                 </div>
                 <div class="stats-pill">
@@ -84,44 +89,49 @@
             </div>
 
             <div class="answers-grid" id="ans-grid">
+                <!-- Кнопки в стиле Kahoot с фигурами -->
                 <button class="ans-btn r" onclick="User.hit(0)">
-                    <span class="s">▲</span><span class="t">Вариант 1</span>
+                    <span class="s">▲</span><span class="t"></span>
                 </button>
                 <button class="ans-btn b" onclick="User.hit(1)">
-                    <span class="s">◆</span><span class="t">Вариант 2</span>
+                    <span class="s">◆</span><span class="t"></span>
                 </button>
                 <button class="ans-btn y" onclick="User.hit(2)">
-                    <span class="s">●</span><span class="t">Вариант 3</span>
+                    <span class="s">●</span><span class="t"></span>
                 </button>
                 <button class="ans-btn g" onclick="User.hit(3)">
-                    <span class="s">■</span><span class="t">Вариант 4</span>
+                    <span class="s">■</span><span class="t"></span>
                 </button>
             </div>
         </section>
 
-        <!-- ЭКРАН 4: РЕЗУЛЬТАТЫ РАУНДА (Results) -->
+        <!-- ЭКРАН 4: РЕЗУЛЬТАТЫ (Промежуточный ТОП) -->
         <section id="view-results" class="screen">
-            <div id="feedback-wrap" class="feedback-card">
+            <div class="feedback-card">
                 <h1 id="fb-main">Время вышло!</h1>
-                <p>Текущий рейтинг группы:</p>
+                <p>Посмотрим лидеров раунда:</p>
             </div>
-            <div id="round-leaderboard">
-                <!-- Сюда JS выведет ТОП-5 после вопроса -->
+            <div id="round-leaderboard" style="width: 100%; max-width: 500px;">
+                <!-- Сюда JS выведет TOP-5 -->
             </div>
         </section>
 
-        <!-- ЭКРАН 5: ПОДИУМ (Финал) -->
+        <!-- ЭКРАН 5: ПОДИУМ (Финал с Конфетти) -->
         <section id="view-podium" class="screen">
-            <h1 class="podium-title">🏆 ФИНАЛЬНЫЙ ТОП 🏆</h1>
-            <div id="podium-final">
+            <div class="k-logo" style="font-size: 3rem;">🏆 ФИНАЛ 🏆</div>
+            <div id="podium-final" style="width: 100%; max-width: 600px;">
                 <!-- Итоговые победители -->
             </div>
-            <button class="btn-hit" style="margin-top: 20px; width: auto;" onclick="location.reload()">На главную</button>
+            <button class="btn-hit" style="margin-top: 30px; width: auto;" onclick="location.reload()">НОВАЯ ИГРА</button>
         </section>
 
     </div>
 
-    <!-- Подключение логики (в самом конце для быстрой отрисовки HTML) -->
+    <!-- ПОДКЛЮЧЕНИЕ СКРИПТОВ -->
+    <!-- sounds.js должен быть первым, чтобы SoundEngine был доступен в game.js -->
+    <script src="sounds.js"></script>
+    <!-- game.js управляет всей логикой и синхронизацией -->
     <script src="game.js"></script>
+
 </body>
 </html>
