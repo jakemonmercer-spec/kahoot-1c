@@ -1,110 +1,68 @@
 :root {
-    --kahoot-purple: #46178f;
-    --red: #e21b3c;
-    --blue: #1368ce;
-    --yellow: #d89e00;
-    --green: #26890c;
-    --white: #ffffff;
+    --purple: #46178f; --red: #e21b3c; --blue: #1368ce; 
+    --yellow: #d89e00; --green: #26890c; --white: #ffffff;
 }
 
 body {
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    background: var(--kahoot-purple);
-    color: var(--white);
-    margin: 0;
-    padding: 0;
-    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+    background: var(--purple);
+    margin: 0; color: white; text-align: center;
 }
 
-.container {
-    max-width: 800px;
-    margin: auto;
-    padding: 20px;
-}
-
-.card {
-    background: var(--white);
-    color: #333;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-}
-
-/* Сетка ответов */
-.grid {
+/* Кнопки как в Kahoot */
+.answers-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-top: 20px;
+    gap: 10px; padding: 20px;
+    height: 30vh;
 }
 
 .ans-btn {
-    border: none;
-    border-radius: 8px;
-    padding: 35px 20px;
-    color: white;
-    font-size: 22px;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    transition: transform 0.1s, brightness 0.2s;
+    border: none; border-radius: 4px;
+    color: white; font-size: 28px; font-weight: bold;
+    display: flex; align-items: center; padding-left: 30px;
+    cursor: pointer; transition: 0.1s;
 }
 
-.ans-btn:hover { brightness(1.1); }
-.ans-btn:active { transform: scale(0.95); }
+.ans-btn.r { background: var(--red); }
+.ans-btn.b { background: var(--blue); }
+.ans-btn.y { background: var(--yellow); }
+.ans-btn.g { background: var(--green); }
 
-.ans-0 { background: var(--red); }
-.ans-1 { background: var(--blue); }
-.ans-2 { background: var(--yellow); }
-.ans-3 { background: var(--green); }
-
-.shape { font-size: 30px; margin-right: 15px; }
+.shape { font-size: 45px; margin-right: 20px; }
 
 /* Таймер */
-#timer-circle {
-    width: 70px;
-    height: 70px;
-    border: 4px solid white;
-    border-radius: 50%;
-    margin: 20px auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    font-weight: bold;
+#timer-val {
+    background: white; color: black;
+    width: 80px; height: 80px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; font-weight: bold;
 }
 
-/* Лидерборд */
-#leaderboard {
-    list-style: none;
-    padding: 0;
-    text-align: left;
+.main-area {
+    display: flex; justify-content: space-around; align-items: center;
+    height: 40vh;
 }
 
-#leaderboard li {
-    background: rgba(255,255,255,0.1);
-    margin: 5px 0;
-    padding: 12px;
-    border-radius: 8px;
-    display: flex;
-    justify-content: space-between;
-}
+.image-placeholder img { max-height: 250px; border-radius: 10px; }
 
-.admin-panel {
-    background: rgba(0,0,0,0.5);
-    margin-top: 50px;
-    padding: 20px;
-    border-radius: 10px;
-    border: 1px dashed white;
+/* Лобби */
+.card {
+    background: white; padding: 30px; border-radius: 10px;
+    width: 300px; margin: 50px auto;
 }
 
 input {
-    width: 100%;
-    padding: 15px;
-    font-size: 18px;
-    margin-bottom: 15px;
-    border-radius: 8px;
-    border: none;
-    box-sizing: border-box;
+    width: 100%; padding: 15px; font-size: 18px;
+    border: 2px solid #ccc; margin-bottom: 15px; box-sizing: border-box;
+}
+
+.join-btn {
+    width: 100%; background: #333; color: white;
+    padding: 15px; border: none; font-weight: bold; cursor: pointer;
+}
+
+.admin-panel {
+    position: fixed; bottom: 0; width: 100%;
+    background: rgba(0,0,0,0.8); padding: 10px;
 }
