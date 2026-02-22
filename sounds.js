@@ -1,39 +1,42 @@
 const SoundEngine = {
-    ctx: null,
-    init() {
-        if (!this.ctx) {
-            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (this.ctx.state === 'suspended') this.ctx.resume();
+    ctx: new (window.AudioContext || window.webkitAudioContext)(),
+
+    // Генерация игрового бипа (для кнопок)
+    playTap() {
+        this.osc(440, 'triangle', 0.1, 0.2);
     },
-    playTone(freq, type, duration, volume, decay = true) {
-        this.init();
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-        gain.gain.setValueAtTime(volume, this.ctx.currentTime);
-        if (decay) gain.gain.exponentialRampToValueAtTime(0.00001, this.ctx.currentTime + duration);
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.start();
-        osc.stop(this.ctx.currentTime + duration);
-    },
-    playTap() { this.playTone(600, 'sine', 0.1, 0.2); },
+
+    // Звук правильного ответа (мажорный аккорд)
     playCorrect() {
-        this.playTone(523, 'sine', 0.5, 0.2);
-        setTimeout(() => this.playTone(659, 'sine', 0.5, 0.2), 100);
-        setTimeout(() => this.playTone(783, 'sine', 0.5, 0.2), 200);
+        this.osc(523.25, 'sine', 0.1, 0.3);
+        setTimeout(() => this.osc(659.25, 'sine', 0.1, 0.3), 100);
+        setTimeout(() => this.osc(783.99, 'sine', 0.1, 0.3), 200);
     },
+
+    // Звук ошибки (диссонанс)
     playWrong() {
-        this.playTone(200, 'sawtooth', 0.4, 0.2);
-        this.playTone(180, 'sawtooth', 0.4, 0.2);
+        this.osc(220, 'sawtooth', 0.3, 0.3);
+        this.osc(233, 'sawtooth', 0.3, 0.3);
     },
-    playTick() { this.playTone(1200, 'sine', 0.05, 0.1); },
-    playFanfare() {
-        [523, 523, 523, 698].forEach((f, i) => {
-            setTimeout(() => this.playTone(f, 'square', 0.4, 0.15), i * 200);
+
+    // Звук победы (фанфары)
+    playWin() {
+        const notes = [523, 523, 523, 698];
+        notes.forEach((f, i) => {
+            setTimeout(() => this.osc(f, 'square', 0.2, 0.3), i * 150);
         });
+    },
+
+    osc(freq, type, duration, vol) {
+        const o = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        o.type = type;
+        o.frequency.value = freq;
+        g.gain.setValueAtTime(vol, this.ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.00001, this.ctx.currentTime + duration);
+        o.connect(g);
+        g.connect(this.ctx.destination);
+        o.start();
+        o.stop(this.ctx.currentTime + duration);
     }
 };
-window.SoundEngine = SoundEngine;
