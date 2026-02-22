@@ -59,26 +59,16 @@ db.ref('.info/serverTimeOffset').on('value', snap => {
 // ==========================================
 
 const User = {
-    async join(forcedNick = "") {
+    async join() {
         if (typeof SoundEngine !== 'undefined') SoundEngine.init();
         
-        let nameToUse = forcedNick || (document.getElementById('p-nick') ? document.getElementById('p-nick').value.trim() : "");
-        
-        // Если имя пустое (опоздал или не ввел) - генерируем случайное животное
-        if (!nameToUse) {
-            const randomAnimal = ANIMAL_NAMES[Math.floor(Math.random() * ANIMAL_NAMES.length)];
-            nameToUse = randomAnimal + " " + Math.floor(Math.random() * 99);
-        }
-        
-        // Защита: ник никогда не должен быть строкой "undefined"
-        if (nameToUse === "undefined") {
-            nameToUse = "Студент " + Math.floor(Math.random() * 100);
-        }
+        // Автоматическая генерация имени без участия пользователя
+        const randomAnimal = ANIMAL_NAMES[Math.floor(Math.random() * ANIMAL_NAMES.length)];
+        const nameToUse = randomAnimal + " " + (Math.floor(Math.random() * 899) + 100);
 
         state.myNick = nameToUse;
         localStorage.setItem('quiz_nick', state.myNick);
 
-        // Гарантированно создаем запись игрока в базе со всеми полями
         const playerRef = db.ref('players/' + state.myNick);
         await playerRef.set({ 
             score: 0, 
@@ -86,14 +76,19 @@ const User = {
             lastActive: firebase.database.ServerValue.TIMESTAMP 
         });
 
-        // Контроль активности (удаление при выходе)
         playerRef.onDisconnect().remove();
 
         if (typeof SoundEngine !== 'undefined') SoundEngine.playTap();
         this.renderIdentity();
         
         const joinCard = document.getElementById('join-card');
-        if (joinCard) joinCard.innerHTML = `<h2 style="color:#333; font-weight:900;">ВЫ В ИГРЕ!<br><small>${state.myNick}</small></h2>`;
+        if (joinCard) {
+            joinCard.innerHTML = `
+                <div class="pulse">
+                    <h2 style="color:#26890c; font-weight:900;">ВЫ В ИГРЕ!</h2>
+                    <p style="color:#333; font-weight:800;">Ваш позывной:<br><span style="color:#46178f; font-size:1.4rem;">${state.myNick}</span></p>
+                </div>`;
+        }
     },
 
     renderIdentity() {
@@ -196,25 +191,44 @@ const Admin = {
 
 function startSyncTimer(startTime) {
     clearInterval(state.syncTimer);
-    if (!startTime) return;
+    
+    // Защита от "зависания" на ПК: 
+    // Firebase может передать объект-заглушку вместо числа в первую миллисекунду.
+    if (!startTime || typeof startTime !== 'number') {
+        // Если время еще не пришло от сервера, ставим дефолт и ждем следующего апдейта
+        const el = document.getElementById('timer-sec');
+        if (el) el.innerText = "20";
+        return; 
+    }
 
     state.syncTimer = setInterval(() => {
-        const nowServer = Date.now() + state.serverOffset;
+        // Используем смещение сервера для точности (ServerValue.TIMESTAMP)
+        const nowServer = Date.now() + (state.serverOffset || 0);
         const elapsed = Math.floor((nowServer - startTime) / 1000);
+        
         let left = 20 - elapsed;
         if (left < 0) left = 0;
         
         const el = document.getElementById('timer-sec');
         if (el) {
-            el.innerText = isNaN(left) ? "20" : left;
-            if (left <= 5 && left > 0 && typeof SoundEngine !== 'undefined') SoundEngine.playTick();
+            el.innerText = left;
+            
+            // Визуальные эффекты при малом времени
+            if (left <= 5 && left > 0) {
+                el.style.color = "#e21b3c";
+                if (typeof SoundEngine !== 'undefined') SoundEngine.playTick();
+            } else {
+                el.style.color = "white";
+            }
+
             if (left === 0) {
                 state.canHit = false;
-                document.getElementById('ans-grid').style.opacity = "0.3";
+                const grid = document.getElementById('ans-grid');
+                if (grid) grid.style.opacity = "0.3";
                 clearInterval(state.syncTimer);
             }
         }
-    }, 1000);
+    }, 200); // Увеличена частота проверки (раз в 200мс) для плавности на ПК
 }
 
 // ==========================================
