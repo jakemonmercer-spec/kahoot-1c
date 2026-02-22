@@ -53,21 +53,20 @@
     <!-- 2. ГЛАВНЫЙ КОНТЕЙНЕР ПРИЛОЖЕНИЯ -->
     <div id="app-viewport">
         
-        <!-- ЭКРАН 1: ЛОББИ -->
-        <section id="view-lobby" class="screen active">
-            <div class="k-logo">1C: Quiz</div>
-            
-            <div id="join-card" class="glass-card">
-                <input type="text" id="p-nick" placeholder="Твое имя...">
-                <button onclick="User.join()" class="btn-hit">ИГРАТЬ</button>
-            </div>
-            
-            <div id="online-counter" style="margin-top: 15px; font-weight: 800; font-size: 0.9rem;">Подключение...</div>
-            
-            <div id="player-tags">
-                <!-- Список всех ников отрисует JS -->
-            </div>
-        </section>
+        <!-- ЭКРАН 1: ЛОББИ (Оптимизированный) -->
+<section id="view-lobby" class="screen active">
+    <div class="k-logo">1C: Quiz</div>
+    
+    <div id="join-card" class="glass-card">
+        <!-- Ввод имени удален для быстрого входа -->
+        <button onclick="User.join()" class="btn-hit">ВСТУПИТЬ В ИГРУ</button>
+        <p style="color: #666; margin-top: 15px; font-size: 0.8rem; font-weight: 600;">Никнейм будет назначен автоматически</p>
+    </div>
+    
+    <div id="online-counter" style="margin-top: 15px; font-weight: 800; font-size: 0.9rem;">Подключение к серверу...</div>
+    
+    <div id="player-tags"></div>
+</section>
 
         <!-- ЭКРАН 2: ПРИГОТОВЬТЕСЬ -->
         <section id="view-getready" class="screen">
@@ -143,3 +142,4 @@
 
 </body>
 </html>
+
