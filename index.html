@@ -59,6 +59,7 @@
     
     <div id="join-card" class="glass-card">
         <!-- Ввод имени удален для быстрого входа -->
+        <button onclick="document.getElementById('donate-modal').style.display='flex'" class="btn-donate">На хлеб 🍞</button>
         <button onclick="User.join()" class="btn-hit">ВСТУПИТЬ В ИГРУ</button>
         <p style="color: #666; margin-top: 15px; font-size: 0.8rem; font-weight: 600;">Никнейм будет назначен автоматически</p>
     </div>
@@ -135,11 +136,21 @@
         </section>
 
     </div>
-
+<div id="donate-modal" class="modal-overlay" onclick="this.style.display='none'">
+    <div class="modal-card" onclick="event.stopPropagation()">
+        <h3>Поддержать автора 🍞</h3>
+        <p>На свежий хлеб и кофе для кодинга</p>
+        <!-- Положи файл qr.jpg (твое фото) в папку с проектом -->
+        <img src="qr.jpg" alt="QR Code" class="qr-img">
+        <button class="btn-hit" onclick="document.getElementById('donate-modal').style.display='none'">Закрыть</button>
+    </div>
+</div>
+    
     <!-- СКРИПТЫ -->
     <script src="sounds.js"></script>
     <script src="game.js"></script>
 
 </body>
 </html>
+
 
