@@ -153,6 +153,15 @@ html, body {
     animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
+/* Добавь это в конец раздела 5 или 11 */
+#join-card p {
+    margin-top: 15px;
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
 /* 6. ЭКРАН ВОПРОСА (Адаптация под челки и вырезы) */
 .question-overlay {
     background: var(--white);
