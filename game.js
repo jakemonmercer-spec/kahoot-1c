@@ -1,9 +1,9 @@
-// ==========================================
-// 1. БАЗА ДАННЫХ ВОПРОСОВ (12 ШТУК)
-// ==========================================
+/**
+ * ГЛАВНАЯ ЛОГИКА QUIZ 1C
+ * Обработка игроков, синхронизация с Firebase и авто-пилот
+ */
 
 const QUIZ_DATA = [
-    // --- Вопросы из Лабораторной №6 (7 шт) ---
     { 
         q: "Для чего предназначен объект конфигурации «Отчет»?", 
         a: ["Для хранения паролей", "Для анализа данных и вывода сводных таблиц", "Для ввода новых сотрудников", "Для удаления базы"], 
@@ -39,7 +39,6 @@ const QUIZ_DATA = [
         a: ["«Сформировать»", "«Пуск»", "«Записать и закрыть»", "«Провести»"], 
         c: 0 
     },
-    // --- Базовые вопросы про 1С:Предприятие (5 шт) ---
     { 
         q: "Как называется компания-разработчик системы «1С:Предприятие»?", 
         a: ["1С", "Microsoft", "Oracle", "SAP"], 
@@ -67,20 +66,13 @@ const QUIZ_DATA = [
     }
 ];
 
-// ==========================================
-// 2. ИМЕНА-ЗАГЛУШКИ ДЛЯ РАНДОМА
-// ==========================================
-
 const ANIMAL_NAMES = [
     "Мудрый Кот", "Быстрый Гепард", "Сонная Панда", "Грозный Тигр", "Хитрый Лис", 
     "Смелый Лев", "Тихий Волк", "Веселый Енот", "Гордый Орел", "Умный Сова",
     "Яркий Попугай", "Добрый Слон", "Ловкий Мангуст", "Крутой Бобер", "Синий Кит",
-    "Золотой Олень", "Снежный Барс", "Дикий Кабан", "Вольный Конь", "Лесной Олень",
-    "Черный Гриф", "Белый Медведь", "Рыжая Белка", "Стальной Зубр", "Быстрый Заяц",
-    "Зоркий Сокол", "Могучий Лось", "Пятнистый Жираф", "Речная Выдра", "Горный Козел"
+    "Золотой Олень", "Снежный Барс", "Дикий Кабан", "Вольный Конь", "Лесной Олень"
 ];
 
-// Глобальное состояние игры на устройстве
 let state = {
     myNick: localStorage.getItem('quiz_nick') || "",
     currentQIdx: -1,
@@ -89,64 +81,59 @@ let state = {
     serverOffset: 0
 };
 
-// Вычисляем смещение времени с серверами Google (убирает NaN на таймере)
+// Смещение времени сервера
 db.ref('.info/serverTimeOffset').on('value', snap => {
     state.serverOffset = snap.val() || 0;
 });
 
-// ==========================================
-// 3. ЛОГИКА ИГРОКА (USER)
-// ==========================================
-
 const User = {
-    async join() {
-        if (typeof SoundEngine !== 'undefined') SoundEngine.init();
-        
-        let inputField = document.getElementById('p-nick');
-        let nameToUse = inputField ? inputField.value.trim() : "";
-        
-        // 100% ГАРАНТИЯ РАНДОМА: Если поле пустое, назначаем животное с номером
-        if (!nameToUse) {
-            const randomAnimal = ANIMAL_NAMES[Math.floor(Math.random() * ANIMAL_NAMES.length)];
-            nameToUse = randomAnimal + " #" + Math.floor(Math.random() * 1000);
-        }
-        
-        // Защита от системных глюков
-        if (nameToUse === "undefined") nameToUse = "Студент #" + Math.floor(Math.random() * 1000);
+    // Генерация случайного имени
+    generateRandomNick() {
+        const animal = ANIMAL_NAMES[Math.floor(Math.random() * ANIMAL_NAMES.length)];
+        const num = Math.floor(Math.random() * 900) + 100;
+        return `${animal} #${num}`;
+    },
 
-        // Сохраняем имя в локальную память телефона
-        state.myNick = nameToUse;
+    // Вход в игру (автоматический или ручной)
+    async join(manualName = null) {
+        if (typeof SoundEngine !== 'undefined') SoundEngine.init();
+
+        // Если имя не передано вручную и его нет в памяти - генерируем
+        if (!manualName && !state.myNick) {
+            state.myNick = this.generateRandomNick();
+        } else if (manualName) {
+            state.myNick = manualName;
+        }
+
+        if (!state.myNick || state.myNick === "undefined") {
+            state.myNick = this.generateRandomNick();
+        }
+
         localStorage.setItem('quiz_nick', state.myNick);
 
-        // Гарантированно создаем игрока в базе (как ручного, так и рандомного)
+        // Регистрация в Firebase
         const playerRef = db.ref('players/' + state.myNick);
-        await playerRef.set({ 
-            score: 0, 
+        await playerRef.update({
+            score: 0,
             lastChoice: -1,
-            lastActive: firebase.database.ServerValue.TIMESTAMP 
+            lastActive: firebase.database.ServerValue.TIMESTAMP
         });
 
-        // Если интернет пропал или закрыл вкладку — удаляем из базы
+        // Удаление при выходе
         playerRef.onDisconnect().remove();
 
-        if (typeof SoundEngine !== 'undefined') SoundEngine.playTap();
         this.renderIdentity();
-        
-        // Меняем интерфейс
+        console.log("User joined as:", state.myNick);
+
+        // Визуальное обновление если мы в лобби
         const joinCard = document.getElementById('join-card');
-        if (joinCard) {
+        if (joinCard && manualName) {
             joinCard.innerHTML = `<h2 style="color:#333; font-weight:900;">ВЫ В ИГРЕ!<br><small style="color:#46178f">${state.myNick}</small></h2>`;
         }
     },
 
-    // Очистка памяти телефона (выход)
-    logout() {
-        localStorage.removeItem('quiz_nick');
-        location.reload();
-    },
-
     renderIdentity() {
-        if (!state.myNick || state.myNick === "undefined") return;
+        if (!state.myNick) return;
         let idTag = document.getElementById('player-identity-tag');
         if (!idTag) {
             idTag = document.createElement('div');
@@ -158,258 +145,207 @@ const User = {
     },
 
     hit(idx) {
-        if (!state.canHit || !state.myNick || state.myNick === "undefined") return;
+        if (!state.canHit || !state.myNick) return;
         state.canHit = false;
         
         if (typeof SoundEngine !== 'undefined') SoundEngine.playTap();
-        
         const grid = document.getElementById('ans-grid');
         if (grid) grid.style.opacity = "0.3";
 
-        // Отправляем выбор в базу (для графиков)
         db.ref('players/' + state.myNick + '/lastChoice').set(idx);
 
         if (idx === QUIZ_DATA[state.currentQIdx].c) {
             let timerEl = document.getElementById('timer-sec');
             let timeLeft = timerEl ? parseInt(timerEl.innerText) : 0;
-            if (isNaN(timeLeft)) timeLeft = 0;
-
             let points = 500 + (timeLeft * 25);
             db.ref('players/' + state.myNick + '/score').transaction(s => (s || 0) + points);
             if (typeof SoundEngine !== 'undefined') SoundEngine.playCorrect();
         } else {
             if (typeof SoundEngine !== 'undefined') SoundEngine.playWrong();
         }
+    },
+
+    logout() {
+        localStorage.removeItem('quiz_nick');
+        location.reload();
     }
 };
 
-// ==========================================
-// 4. ЛОГИКА АДМИНА И АВТОПИЛОТ (ADMIN)
-// ==========================================
-
 const Admin = {
     login() {
-        const pinInput = document.getElementById('pin');
-        if (pinInput && pinInput.value === "123") {
+        const pin = document.getElementById('pin').value;
+        if (pin === "123") {
             document.getElementById('auth-lock').style.display = 'none';
             document.getElementById('adm-tools').style.display = 'flex';
-        } else {
-            alert("Неверный PIN!");
         }
     },
 
     setStep(step) { db.ref('game').update({ step: step }); },
 
     async runAuto() {
-        if (!confirm("ЗАПУСТИТЬ ИГРУ? (Автоматический цикл 12 вопросов)")) return;
+        if (!confirm("Запустить автоматический цикл игры?")) return;
         
-        await db.ref('players/undefined').remove();
-
         for (let i = 0; i < QUIZ_DATA.length; i++) {
+            // Сброс выбора игроков перед вопросом
             const playersSnap = await db.ref('players').once('value');
             const updates = {};
-            playersSnap.forEach(child => { updates[`players/${child.key}/lastChoice`] = -1; });
-            await db.ref().update(updates);
+            playersSnap.forEach(snap => { updates[`players/${snap.key}/lastChoice`] = -1; });
+            if (Object.keys(updates).length > 0) await db.ref().update(updates);
 
-            await db.ref('game').set({ 
-                step: 'getready', 
-                qIdx: i, 
-                serverStartTime: firebase.database.ServerValue.TIMESTAMP 
-            });
+            await db.ref('game').set({ step: 'getready', qIdx: i, serverStartTime: firebase.database.ServerValue.TIMESTAMP });
             await new Promise(r => setTimeout(r, 4000));
 
-            await db.ref('game').update({ 
-                step: 'game',
-                serverStartTime: firebase.database.ServerValue.TIMESTAMP 
-            });
+            await db.ref('game').update({ step: 'game', serverStartTime: firebase.database.ServerValue.TIMESTAMP });
             await new Promise(r => setTimeout(r, 21000));
 
             await db.ref('game').update({ step: 'results' });
-            await new Promise(r => setTimeout(r, 6500));
+            await new Promise(r => setTimeout(r, 7000));
         }
-        
         db.ref('game').update({ step: 'podium' });
     },
 
-    // ГЛОБАЛЬНЫЙ СБРОС (Очищает базу и кэш на всех телефонах)
     async reset() {
-        if (confirm("ВНИМАНИЕ! Это очистит базу и принудительно сбросит кэш у всех игроков. Продолжить?")) {
-            // Посылаем всем сигнал на самоуничтожение кэша
-            await db.ref('game/step').set('reset');
-            
-            // Ждем полсекунды, чтобы сигнал дошел до всех, затем чистим базу
-            setTimeout(() => {
-                db.ref('/').set({ game: { step: 'lobby', qIdx: -1 }, players: {} });
-                localStorage.clear();
-                location.reload();
-            }, 500);
-        }
+        if (!confirm("ГЛОБАЛЬНЫЙ СБРОС: Все игроки будут переименованы, база очищена!")) return;
+        await db.ref('game/step').set('reset-signal');
+        setTimeout(async () => {
+            await db.ref('/').set({ game: { step: 'lobby', qIdx: -1 }, players: {} });
+            localStorage.removeItem('quiz_nick');
+            location.reload();
+        }, 500);
     }
 };
 
-// ==========================================
-// 5. ИДЕАЛЬНЫЙ СИНХРОННЫЙ ТАЙМЕР
-// ==========================================
-
-function startSyncTimer(serverStartTime) {
+// Таймер
+function startSyncTimer(startTime) {
     clearInterval(state.syncTimer);
-    if (!serverStartTime) return;
-
     state.syncTimer = setInterval(() => {
-        const nowServer = Date.now() + state.serverOffset;
-        const elapsed = Math.floor((nowServer - serverStartTime) / 1000);
+        const now = Date.now() + state.serverOffset;
+        const elapsed = Math.floor((now - startTime) / 1000);
         let left = 20 - elapsed;
-        
         if (left < 0) left = 0;
-        
+
         const el = document.getElementById('timer-sec');
         if (el) {
-            el.innerText = isNaN(left) ? "20" : left;
-            if (left <= 5 && left > 0 && typeof SoundEngine !== 'undefined') SoundEngine.playTick();
+            el.innerText = left;
+            if (left <= 5 && left > 0) SoundEngine.playTick();
             if (left === 0) {
                 state.canHit = false;
-                const grid = document.getElementById('ans-grid');
-                if (grid) grid.style.opacity = "0.3";
+                if (document.getElementById('ans-grid')) document.getElementById('ans-grid').style.opacity = "0.3";
                 clearInterval(state.syncTimer);
             }
         }
     }, 1000);
 }
 
-// ==========================================
-// 6. СЛУШАТЕЛИ FIREBASE (REALTIME РЕНДЕР)
-// ==========================================
-
+// Синхронизация состояния игры
 db.ref('game').on('value', snap => {
-    const g = snap.val() || { step: 'lobby', qIdx: -1 };
+    const g = snap.val() || {};
     
-    // ПРИНУДИТЕЛЬНЫЙ СБРОС ДЛЯ ВСЕХ УСТРОЙСТВ
-    if (g.step === 'reset') {
+    if (g.step === 'reset-signal') {
         localStorage.removeItem('quiz_nick');
         location.reload();
-        return; // Останавливаем выполнение
+        return;
     }
 
     state.currentQIdx = g.qIdx;
-
-    // АВТО-ВХОД ДЛЯ ОПОЗДАВШИХ
-    if (!state.myNick && g.step !== 'lobby' && g.step !== 'wait') {
-        User.join(); // Присвоит рандомное имя и сразу добавит в базу
-    }
-
+    
+    // Скрытие/Показ экранов
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    const targetView = document.getElementById('view-' + g.step);
-    if (targetView) targetView.classList.add('active');
+    const target = document.getElementById('view-' + g.step);
+    if (target) target.classList.add('active');
 
     if (g.step === 'game') {
         state.canHit = true;
-        const grid = document.getElementById('ans-grid');
-        if (grid) grid.style.opacity = "1";
-        
-        const q = QUIZ_DATA[state.currentQIdx];
+        if (document.getElementById('ans-grid')) document.getElementById('ans-grid').style.opacity = "1";
+        const q = QUIZ_DATA[g.qIdx];
         if (q) {
             document.getElementById('q-text').innerText = q.q;
-            const btnTexts = document.querySelectorAll('.ans-btn .t');
-            q.a.forEach((text, i) => { if (btnTexts[i]) btnTexts[i].innerText = text; });
+            const btns = document.querySelectorAll('.ans-btn .t');
+            q.a.forEach((text, i) => { if (btns[i]) btns[i].innerText = text; });
         }
         startSyncTimer(g.serverStartTime);
     }
-    
+
     if (g.step === 'podium') {
+        if (typeof createConfetti === 'function') createConfetti();
         if (typeof SoundEngine !== 'undefined') SoundEngine.playFanfare();
-        createConfetti();
     }
 });
 
-// Слушатель игроков (Отрисовка списков)
+// Синхронизация списка игроков (Лобби и Рейтинг)
 db.ref('players').on('value', snap => {
-    const pData = snap.val() || {};
-    if (pData.undefined) db.ref('players/undefined').remove();
+    const players = snap.val() || {};
+    const entries = Object.entries(players).filter(([name]) => name !== "undefined");
+    const sorted = [...entries].sort((a, b) => b[1].score - a[1].score);
 
-    // Берем всех игроков (даже тех, кто не нажимал кнопки)
-    const allPlayersEntries = Object.entries(pData).filter(([name]) => name !== "undefined" && name !== "");
-    const sortedPlayers = [...allPlayersEntries].sort((a, b) => b[1].score - a[1].score);
-    
-    const lobby = document.getElementById('player-tags');
-    if (lobby) {
-        lobby.innerHTML = allPlayersEntries.map(([n]) => `<div class="tag">${n}</div>`).join('');
-    }
-    
+    // 1. Счетчик онлайн
     const counter = document.getElementById('online-counter');
-    if (counter) counter.innerText = `Подключено: ${allPlayersEntries.length} студентов`;
+    if (counter) counter.innerText = `В игре: ${entries.length} участников`;
 
-    // Графики статистики
+    // 2. Облако тегов в лобби
+    const lobbyList = document.getElementById('player-tags');
+    if (lobbyList) {
+        lobbyList.innerHTML = entries.map(([name]) => `<div class="tag">${name}</div>`).join('');
+    }
+
+    // 3. Статистика ответов (графики)
     let stats = [0, 0, 0, 0];
-    allPlayersEntries.forEach(([_, data]) => {
-        if (data.lastChoice !== undefined && data.lastChoice >= 0) {
-            stats[data.lastChoice]++;
-        }
+    entries.forEach(([_, data]) => {
+        if (data.lastChoice >= 0) stats[data.lastChoice]++;
     });
-
     stats.forEach((count, i) => {
         const bar = document.getElementById(`bar-${i}`);
-        const countTxt = document.getElementById(`count-${i}`);
-        if (bar) bar.style.height = (count * 20 + 5) + "px"; 
-        if (countTxt) countTxt.innerText = count;
+        const txt = document.getElementById(`count-${i}`);
+        if (bar) bar.style.height = (count * 25 + 5) + "px";
+        if (txt) txt.innerText = count;
     });
 
-    // Рейтинг всех участников (даже с 0 баллов)
-    let fullRankHtml = sortedPlayers.map(([n, d], i) => `
-        <div class="podium-row ${i === 0 && d.score > 0 ? 'place-1' : ''}">
-            <span>${i + 1}. ${n}</span>
-            <b>${d.score}</b>
+    // 4. Рейтинговые списки
+    const listHtml = sorted.map(([name, data], i) => `
+        <div class="podium-row ${i === 0 && data.score > 0 ? 'place-1' : ''}">
+            <span>${i + 1}. ${name}</span>
+            <b>${data.score}</b>
         </div>
     `).join('');
 
-    if (allPlayersEntries.length === 0) {
-        fullRankHtml = "<div class='tag'>Ждем игроков...</div>";
-    }
+    const leaderBoard = document.getElementById('round-leaderboard');
+    if (leaderBoard) leaderBoard.innerHTML = listHtml || "Ожидание ответов...";
 
-    const roundLeaderboard = document.getElementById('round-leaderboard');
-    if (roundLeaderboard) roundLeaderboard.innerHTML = fullRankHtml;
-    
-    const podiumFinal = document.getElementById('podium-final');
-    if (podiumFinal) podiumFinal.innerHTML = fullRankHtml;
+    const finalBoard = document.getElementById('podium-final');
+    if (finalBoard) finalBoard.innerHTML = listHtml || "Никто не дошел до финала";
 
-    const ansCountDisplay = document.getElementById('ans-count');
-    const answersReceived = allPlayersEntries.filter(([_, d]) => d.lastChoice !== undefined && d.lastChoice >= 0).length;
-    if (ansCountDisplay) ansCountDisplay.innerText = answersReceived;
+    // 5. Счетчик полученных ответов
+    const ansCount = document.getElementById('ans-count');
+    if (ansCount) ansCount.innerText = entries.filter(([_, d]) => d.lastChoice >= 0).length;
 });
 
-// ==========================================
-// 7. ДОПОЛНИТЕЛЬНЫЕ ЭФФЕКТЫ И МОДАЛКА
-// ==========================================
-
+// Конфетти для финала
 function createConfetti() {
-    for (let i = 0; i < 100; i++) {
-        const c = document.createElement('div');
-        c.className = 'confetti';
-        c.style.left = Math.random() * 100 + 'vw';
-        c.style.backgroundColor = ['#ff3366','#2de2e2','#f8e71c','#7ed321','#ffffff'][Math.floor(Math.random()*5)];
-        c.style.width = Math.random() * 12 + 6 + 'px';
-        c.style.height = c.style.width;
-        document.body.appendChild(c);
-        
-        c.animate([
-            { top: '-10%', transform: 'rotate(0deg)' },
-            { top: '110%', transform: 'rotate(' + (Math.random() * 720 + 360) + 'deg)' }
-        ], { 
-            duration: 2500 + Math.random() * 3000, 
-            iterations: Infinity 
-        });
+    for (let i = 0; i < 50; i++) {
+        const div = document.createElement('div');
+        div.className = 'confetti';
+        div.style.left = Math.random() * 100 + 'vw';
+        div.style.backgroundColor = ['#ff0', '#f0f', '#0ff', '#0f0'][Math.floor(Math.random() * 4)];
+        document.body.appendChild(div);
+        div.animate([{top: '-10%'}, {top: '100%'}], {duration: Math.random() * 3000 + 2000, iterations: Infinity});
     }
 }
 
-function showDonation() {
-    const modal = document.getElementById('bread-modal');
-    if (modal) modal.style.display = 'flex';
-}
+// ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ
+window.onload = () => {
+    // Автоматический вход если ника нет
+    User.join();
+    
+    // Кнопка входа для тех, кто хочет сменить имя вручную в лобби
+    window.handleJoinBtn = () => {
+        const input = document.getElementById('p-nick');
+        if (input && input.value.trim()) {
+            User.join(input.value.trim());
+        } else {
+            alert("Введите имя или играйте под случайным!");
+        }
+    };
+};
 
-// Восстановление имени при случайной перезагрузке страницы
-if (state.myNick && state.myNick !== "undefined") {
-    User.renderIdentity();
-}
-
-// Глобальный экспорт
-window.User = User; 
+window.User = User;
 window.Admin = Admin;
