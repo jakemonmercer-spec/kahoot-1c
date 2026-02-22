@@ -1,32 +1,20 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <!-- Продвинутая защита от масштабирования на уровне браузера -->
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
-    <!-- Мета-теги для Android (Chrome) и iOS (Safari) -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="format-detection" content="telephone=no">
-
-    <title>1С: Квиз - Лабораторная №6 (Синхронная Версия)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>1С: Квиз - Лабораторная №6</title>
     
     <!-- Стили -->
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     
-    <!-- Подключение топового шрифта Montserrat с разными весами -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
-    <!-- Firebase SDK (Версия 9 COMPAT для максимальной стабильности на GitHub Pages) -->
+    <!-- Firebase SDK (Compat) -->
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
 
     <script>
-        // ==========================================
-        // ЦЕНТРАЛЬНАЯ КОНФИГУРАЦИЯ БАЗЫ (FIREBASE)
-        // ==========================================
+        // --- КОНФИГУРАЦИЯ БАЗЫ ---
         const firebaseConfig = {
             apiKey: "AIzaSyBrPKRi5NWA7JRcdbA2YLO4HPR3ULaBlGk",
             authDomain: "quiz1c.firebaseapp.com",
@@ -38,201 +26,94 @@
             measurementId: "G-JYTEXXW2BD"
         };
 
-        // Инициализация базы данных Google Firebase мгновенно
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        
-        // Вспомогательный лог для отладки синхронизации
-        console.log("1C Quiz Engine initialized. Syncing with global database...");
-    </script>
-
-    <script>
-        // ==========================================
-        // ПРИНУДИТЕЛЬНАЯ БЛОКИРОВКА ЗУМА (ANDROID FIX)
-        // ==========================================
-        // Этот скрипт запрещает Android браузерам увеличивать страницу даже при двойном тапе
-        document.addEventListener('touchstart', function (event) {
-            if (event.touches.length > 1) {
-                event.preventDefault(); // Запрет мульти-тач зума
-            }
-        }, { passive: false });
-
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', function (event) {
-            let now = (new Date()).getTime();
-            if (now - lastTouchEnd <= 300) {
-                event.preventDefault(); // Запрет зума при двойном клике
-            }
-            lastTouchEnd = now;
-        }, false);
     </script>
 </head>
-<body oncontextmenu="return false;"> 
+<body oncontextmenu="return false;">
 
-    <!-- 1. ПАНЕЛЬ УПРАВЛЕНИЯ ПРЕПОДАВАТЕЛЯ (Верхняя полоса) -->
+    <!-- ИНДИКАТОР АКТИВНОСТИ (Label на 10 игроков) -->
+    <div id="active-players-label">
+        <span id="label-count">0</span> игроков в сети:
+        <div id="label-names-list"></div>
+    </div>
+
+    <!-- АДМИН-ПАНЕЛЬ -->
     <nav id="admin-pwa-bar">
-        <!-- Блок авторизации админа -->
         <div id="auth-lock">
-            <input type="password" id="pin" placeholder="PIN-КОД">
-            <button onclick="Admin.login()">ВОЙТИ</button>
+            <input type="password" id="pin" placeholder="PIN">
+            <button onclick="Admin.login()">OK</button>
         </div>
-        
-        <!-- Кнопки управления (видны только после ввода PIN) -->
         <div id="adm-tools" style="display:none;">
-            <button class="a-btn" onclick="Admin.setStep('lobby')">В ЛОББИ</button>
-            <button class="a-btn primary" onclick="Admin.runAuto()">АВТО-СТАРТ (12 ВОПРОСОВ)</button>
-            <button class="a-btn danger" onclick="Admin.reset()">СБРОС СИСТЕМЫ</button>
-            <div id="admin-info-status" style="color: #00ff00; font-size: 9px; margin-left: 10px; font-weight: 800;">
-                SERVER CONNECTED
-            </div>
+            <button class="a-btn" onclick="Admin.setStep('lobby')">ЛОББИ</button>
+            <button class="a-btn primary" onclick="Admin.runAuto()">СТАРТ</button>
+            <button class="a-btn danger" onclick="Admin.reset()">СБРОС</button>
         </div>
     </nav>
 
-    <!-- 2. ГЛАВНЫЙ КОНТЕЙНЕР ДЛЯ ОТОБРАЖЕНИЯ ЭКРАНОВ -->
     <div id="app-viewport">
         
-        <!-- ЭКРАН: ЛОББИ (Регистрация всех участников) -->
+        <!-- ЭКРАН 1: ЛОББИ -->
         <section id="view-lobby" class="screen active">
             <div class="k-logo">1C: Quiz</div>
             
             <div id="join-card" class="glass-card">
-                <h3 style="margin-bottom: 15px; color: #333;">Добро пожаловать!</h3>
-                <input type="text" id="p-nick" placeholder="Введите ваше ФИО...">
-                <button onclick="User.join()" class="btn-hit">ВСТУПИТЬ В ИГРУ</button>
+                <p id="welcome-msg" style="color:#333; margin-bottom:10px;">Введите имя или играйте анонимно:</p>
+                <input type="text" id="p-nick" placeholder="Ваше ФИО...">
+                <button onclick="User.manualJoin()" class="btn-hit">ИЗМЕНИТЬ ИМЯ</button>
             </div>
             
-            <div id="online-counter" class="pulse-text">Синхронизация участников...</div>
-            
-            <!-- Динамический список ВСЕХ студентов (для ЛОББИ) -->
             <div id="player-tags" class="scroll-zone">
-                <!-- Сюда JavaScript выводит ники всех, кто в сети -->
+                <!-- Все участники лобби -->
             </div>
         </section>
 
-        <!-- ЭКРАН: ПРИГОТОВЬТЕСЬ (Таймер-пауза перед вопросом) -->
+        <!-- ЭКРАН 2: ПРИГОТОВЬТЕСЬ -->
         <section id="view-getready" class="screen">
-            <h1 class="prep-text pulse-animation">ПРИГОТОВЬТЕСЬ!</h1>
-            <div class="winner-row place-1" style="background: #ffffff; color: #000000; margin-top: 30px; font-size: 1.5rem;">
-                Вопрос появится на экране через миг...
-            </div>
+            <h1 class="prep-text pulse">ПРИГОТОВЬТЕСЬ!</h1>
         </section>
 
-        <!-- ЭКРАН: ВОПРОС (Синхронный геймплей) -->
+        <!-- ЭКРАН 3: ВОПРОС -->
         <section id="view-game" class="screen">
-            <!-- Шапка вопроса -->
             <div class="question-overlay">
-                <h2 id="q-text">Загрузка текста вопроса...</h2>
+                <h2 id="q-text">Загрузка...</h2>
             </div>
-            
-            <!-- Индикаторы (Таймер и счетчик ответов) -->
             <div class="game-hud">
-                <div class="timer-orb">
-                    <span id="timer-sec">20</span>
-                </div>
-                <div class="stats-pill">
-                    <span id="ans-count">0</span> / 0 ответов
-                </div>
+                <div class="timer-orb"><span id="timer-sec">20</span></div>
+                <div class="stats-pill"><span id="ans-count">0</span> ответов</div>
             </div>
-
-            <!-- Игровая сетка ответов -->
             <div class="answers-grid" id="ans-grid">
-                <button class="ans-btn r" onclick="User.hit(0)">
-                    <span class="s">▲</span><span class="t">Вариант 1</span>
-                </button>
-                <button class="ans-btn b" onclick="User.hit(1)">
-                    <span class="s">◆</span><span class="t">Вариант 2</span>
-                </button>
-                <button class="ans-btn y" onclick="User.hit(2)">
-                    <span class="s">●</span><span class="t">Вариант 3</span>
-                </button>
-                <button class="ans-btn g" onclick="User.hit(3)">
-                    <span class="s">■</span><span class="t">Вариант 4</span>
-                </button>
+                <button class="ans-btn r" onclick="User.hit(0)"><span class="s">▲</span><span class="t"></span></button>
+                <button class="ans-btn b" onclick="User.hit(1)"><span class="s">◆</span><span class="t"></span></button>
+                <button class="ans-btn y" onclick="User.hit(2)"><span class="s">●</span><span class="t"></span></button>
+                <button class="ans-btn g" onclick="User.hit(3)"><span class="s">■</span><span class="t"></span></button>
             </div>
         </section>
 
-        <!-- ЭКРАН: РЕЗУЛЬТАТЫ (Графики + Полный список участников) -->
+        <!-- ЭКРАН 4: РЕЗУЛЬТАТЫ -->
         <section id="view-results" class="screen">
             <div class="feedback-card">
-                <h1 id="fb-main" style="font-weight: 900; margin-bottom: 10px;">ВРЕМЯ ВЫШЛО!</h1>
-                <p style="color: #666; font-size: 0.8rem; margin-bottom: 15px;">Статистика ответов группы:</p>
-                
-                <!-- ГРАФИЧЕСКИЕ СТОЛБИКИ (СТОЛБЧАТАЯ ДИАГРАММА) -->
+                <h1>СТАТИСТИКА</h1>
                 <div class="stats-container">
-                    <!-- Красный ▲ -->
-                    <div class="stat-col">
-                        <span id="count-0" class="stat-num">0</span>
-                        <div id="bar-0" class="bar r-bar"></div>
-                        <span class="shape-label">▲</span>
-                    </div>
-                    <!-- Синий ◆ -->
-                    <div class="stat-col">
-                        <span id="count-1" class="stat-num">0</span>
-                        <div id="bar-1" class="bar b-bar"></div>
-                        <span class="shape-label">◆</span>
-                    </div>
-                    <!-- Желтый ● -->
-                    <div class="stat-col">
-                        <span id="count-2" class="stat-num">0</span>
-                        <div id="bar-2" class="bar y-bar"></div>
-                        <span class="shape-label">●</span>
-                    </div>
-                    <!-- Зеленый ■ -->
-                    <div class="stat-col">
-                        <span id="count-3" class="stat-num">0</span>
-                        <div id="bar-3" class="bar g-bar"></div>
-                        <span class="shape-label">■</span>
-                    </div>
+                    <div class="stat-col"><span id="count-0">0</span><div id="bar-0" class="bar r-bar"></div><span>▲</span></div>
+                    <div class="stat-col"><span id="count-1">0</span><div id="bar-1" class="bar b-bar"></div><span>◆</span></div>
+                    <div class="stat-col"><span id="count-2">0</span><div id="bar-2" class="bar y-bar"></div><span>●</span></div>
+                    <div class="stat-col"><span id="count-3">0</span><div id="bar-3" class="bar g-bar"></div><span>■</span></div>
                 </div>
             </div>
-
-            <!-- ТЕКУЩИЙ РЕЙТИНГ (Список ВСЕХ игроков) -->
-            <div class="rating-header" style="margin: 15px 0 5px 0; font-weight: 800;">РЕЙТИНГ ГРУППЫ:</div>
-            <div id="round-leaderboard" class="scroll-list">
-                <!-- Сюда JS выводит всех участников -->
-            </div>
+            <div id="round-leaderboard" class="scroll-list"></div>
         </section>
 
-        <!-- ЭКРАН: ФИНАЛЬНЫЙ ПОДИУМ (Завершение) -->
+        <!-- ЭКРАН 5: ПОДИУМ -->
         <section id="view-podium" class="screen">
-            <div class="k-logo pulse-animation" style="font-size: clamp(2rem, 10vw, 4rem); margin-bottom: 20px;">🏆 ФИНАЛ 🏆</div>
-            
-            <!-- Итоговая таблица всех студентов -->
-            <div id="podium-final" class="scroll-list" style="max-height: 55vh; padding: 10px;">
-                <!-- JS рендерит всех игроков -->
-            </div>
-            
-            <!-- КНОПКА ПОЖЕРТВОВАНИЯ НА ХЛЕБ -->
-            <div class="donation-section" style="margin-top: 25px;">
-                <button class="btn-hit" style="background: #ffcc00; color: #000; width: auto; padding: 15px 40px;" onclick="showDonation()">
-                    ПОЖЕРТВОВАТЬ НА ХЛЕБ 🍞
-                </button>
-            </div>
-            
-            <button class="btn-hit" style="margin-top: 20px; width: auto; font-size: 0.7rem; background: rgba(0,0,0,0.5); padding: 8px 20px; box-shadow: none;" onclick="location.reload()">
-                ВЕРНУТЬСЯ В НАЧАЛО
-            </button>
+            <div class="k-logo">🏆 ФИНАЛ 🏆</div>
+            <div id="podium-final" class="scroll-list"></div>
+            <button class="btn-hit" style="margin-top:20px; width:auto;" onclick="Admin.reset()">НОВАЯ ИГРА</button>
         </section>
 
     </div>
 
-    <!-- МОДАЛЬНОЕ ОКНО ПОДДЕРЖКИ (QR-КОД) -->
-    <div id="bread-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-card">
-            <h2 style="font-weight: 900; color: #333;">ПОДДЕРЖКА РАЗРАБОТЧИКА</h2>
-            <p style="margin: 15px 0; color: #666; font-size: 0.9rem; line-height: 1.4;">
-                Ваш донат поможет студенту выжить в это непростое время сессии!
-            </p>
-            <div class="qr-container">
-                <!-- Динамическая генерация QR на твой гитхаб/оплату -->
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://github.com/jakemonmercer-spec" alt="QR на хлеб">
-            </div>
-            <p style="font-size: 0.7rem; color: #aaa; margin-top: 5px;">*Отсканируйте код камерой смартфона</p>
-            <button class="btn-hit" style="margin-top: 20px; background: #46178f;" onclick="document.getElementById('bread-modal').style.display='none'">ПОНЯТНО</button>
-        </div>
-    </div>
-
-    <!-- ПОДКЛЮЧЕНИЕ СКРИПТОВ ЛОГИКИ (В КОНЦЕ) -->
+    <!-- СКРИПТЫ -->
     <script src="sounds.js"></script>
     <script src="game.js"></script>
 
