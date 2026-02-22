@@ -1,86 +1,85 @@
 /* ============================================================
-   1. ШРИФТЫ И ОСНОВНЫЕ ПЕРЕМЕННЫЕ (КАНОНИЧНЫЙ KAHOOT)
+   1. ШРИФТЫ И ЯДРО ПЕРЕМЕННЫХ
    ============================================================ */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-    --bg-color: #46178f;     /* Фиолетовый фон */
-    --accent: #ffcc00;       /* Желтый (акцент) */
+    --bg-main: #46178f;     /* Фирменный фиолетовый */
+    --accent: #ffcc00;       /* Желтый акцент */
     --red: #e21b3c;          /* Красный ▲ */
     --blue: #1368ce;         /* Синий ◆ */
     --yellow: #ffa600;       /* Золотой ● */
     --green: #26890c;        /* Зеленый ■ */
     --white: #ffffff;
     --black: #000000;
-    --dark-grey: #333333;
     --glass: rgba(255, 255, 255, 0.15);
     --glass-border: rgba(255, 255, 255, 0.3);
     --font-main: 'Montserrat', sans-serif;
-    --shadow-soft: 0 10px 30px rgba(0,0,0,0.3);
 }
 
 /* ============================================================
-   2. ЖЕСТКАЯ ЗАЩИТА ОТ ЗУМА И СБРОС (ANTI-ZOOM)
+   2. ГЛОБАЛЬНАЯ ЗАЩИТА И СБРОС (ANTI-ZOOM & PWA)
    ============================================================ */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    /* touch-action: manipulation запрещает браузеру зумить при двойном клике */
+    /* touch-action: manipulation — отключает системный зум при двойном клике */
     touch-action: manipulation; 
     -webkit-tap-highlight-color: transparent;
     -webkit-font-smoothing: antialiased;
 }
 
 html, body {
-    /* dvh — динамическая высота, чтобы интерфейс не прыгал из-за панелей браузера */
+    /* dvh (Dynamic Viewport Height) — критично для мобильных браузеров */
     height: 100dvh;
     width: 100%;
-    background-color: var(--bg-color);
+    background-color: var(--bg-main);
     color: var(--white);
     font-family: var(--font-main);
-    /* Полная блокировка системной прокрутки всей страницы */
+    /* Полный запрет прокрутки страницы, чтобы не было "дерганий" */
     overflow: hidden; 
     position: fixed;
     user-select: none; /* Запрет выделения текста */
 }
 
 /* ============================================================
-   3. УМНЫЙ LABEL (ИНДИКАТОР АКТИВНОСТИ ИГРОКОВ)
+   3. ИНДИКАТОР АКТИВНОСТИ (LABEL) — СВЯЗКА ВСЕХ ИГРОКОВ
    ============================================================ */
-#active-players-label {
+#status-bar-players {
     position: fixed;
-    top: 55px; /* Сразу под админ-панелью */
+    top: 55px; /* Сразу под админкой */
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(5px);
-    padding: 5px 15px;
-    border-radius: 20px;
-    font-size: 12px;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    padding: 6px 18px;
+    border-radius: 25px;
+    font-size: clamp(10px, 2.5vw, 13px);
     font-weight: 700;
-    z-index: 500;
+    z-index: 900;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     width: auto;
-    max-width: 90%;
+    max-width: 85%;
     white-space: nowrap;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
 }
 
-#label-names-list {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: var(--accent);
+.indicator { color: #00ff00; animation: blink 1s infinite; }
+#players-names-line { 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+    color: var(--accent); 
+    font-style: italic;
 }
 
-#label-count {
-    color: #00ff00;
-}
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
 /* ============================================================
-   4. ВЕРХНЯЯ ПАНЕЛЬ АДМИНИСТРАТОРА
+   4. АДМИН-ПАНЕЛЬ (TOP BAR)
    ============================================================ */
 #admin-pwa-bar {
     height: 50px;
@@ -91,33 +90,37 @@ html, body {
     justify-content: center;
     padding: 0 10px;
     z-index: 10000;
+    position: relative;
 }
 
 #admin-pwa-bar input[type="password"] {
-    width: 70px;
-    padding: 5px;
-    font-size: 14px;
-    border-radius: 5px;
+    width: 60px;
+    height: 30px;
+    background: #222;
+    color: white;
     border: none;
+    border-radius: 4px;
     text-align: center;
+    font-weight: bold;
 }
 
 #admin-pwa-bar button {
     border: none;
-    padding: 8px 14px;
+    padding: 8px 15px;
     border-radius: 5px;
     font-weight: 800;
     cursor: pointer;
-    font-size: 11px;
+    font-size: 10px;
     text-transform: uppercase;
     margin-left: 5px;
+    transition: 0.2s;
 }
 
-.primary { background: var(--green); color: #fff; }
+.primary { background: var(--green); color: white; }
 .danger { background: #333; color: var(--red); }
 
 /* ============================================================
-   5. ОБОЛОЧКА ЭКРАНОВ
+   5. ОБОЛОЧКА ПРИЛОЖЕНИЯ
    ============================================================ */
 #app-viewport {
     height: calc(100dvh - 50px);
@@ -133,16 +136,15 @@ html, body {
     align-items: center;
     justify-content: center;
     padding: 20px;
-    text-align: center;
 }
 
 .screen.active {
     display: flex;
-    animation: fadeIn 0.3s ease;
+    animation: fadeIn 0.4s ease-out;
 }
 
 /* ============================================================
-   6. ЛОББИ И КАРТОЧКА ВХОДА
+   6. ЛОББИ И ВХОД (LOBBY)
    ============================================================ */
 .k-logo {
     font-size: clamp(2.5rem, 12vw, 6rem);
@@ -153,7 +155,7 @@ html, body {
 
 .glass-card {
     background: var(--white);
-    padding: clamp(20px, 5vw, 40px);
+    padding: 25px;
     border-radius: 20px;
     width: 100%;
     max-width: 380px;
@@ -170,6 +172,7 @@ html, body {
     text-align: center;
     color: #333;
     font-weight: 700;
+    outline: none;
 }
 
 .btn-hit {
@@ -183,17 +186,18 @@ html, body {
     font-size: 1.3rem;
     cursor: pointer;
     box-shadow: 0 5px 0 #000;
+    transition: 0.1s;
 }
 
 .btn-hit:active { transform: translateY(3px); box-shadow: 0 2px 0 #000; }
 
-/* Облако ников в лобби */
+/* Список игроков в лобби */
 .scroll-zone {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 10px;
     justify-content: center;
-    margin-top: 50px; /* Чтобы не перекрывал лейбл */
+    margin-top: 40px;
     overflow-y: auto;
     max-height: 25vh;
     width: 100%;
@@ -206,11 +210,11 @@ html, body {
     border-radius: 5px;
     font-weight: 700;
     font-size: 14px;
-    animation: popIn 0.4s ease forwards;
+    animation: pop 0.4s ease;
 }
 
 /* ============================================================
-   7. ИГРОВОЙ ЭКРАН (ВОПРОСЫ И ТАЙМЕР)
+   7. ЭКРАН ВОПРОСА (GAME)
    ============================================================ */
 .question-overlay {
     background: var(--white);
@@ -221,7 +225,7 @@ html, body {
     top: 50px;
     left: 0;
     z-index: 100;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
 .question-overlay h2 {
@@ -234,7 +238,7 @@ html, body {
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    max-width: 1000px;
+    max-width: 1100px;
     margin-top: 140px;
     margin-bottom: 20px;
 }
@@ -258,15 +262,15 @@ html, body {
     font-weight: 700;
 }
 
-/* Сетка ответов */
+/* СЕТКА ОТВЕТОВ */
 .answers-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 12px;
     width: 100%;
     max-width: 1200px;
     flex: 1;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 .ans-btn {
@@ -277,9 +281,9 @@ html, body {
     font-weight: 800;
     display: flex;
     align-items: center;
-    padding: 0 25px;
+    padding: 0 30px;
     cursor: pointer;
-    box-shadow: 0 5px 0 rgba(0,0,0,0.1);
+    box-shadow: 0 5px 0 rgba(0,0,0,0.15);
 }
 
 .ans-btn.r { background: var(--red); }
@@ -296,11 +300,11 @@ html, body {
 .feedback-card {
     background: var(--white);
     color: #000;
-    padding: 20px;
-    border-radius: 20px;
+    padding: 25px;
+    border-radius: 25px;
     width: 100%;
     max-width: 500px;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .stats-container {
@@ -316,21 +320,18 @@ html, body {
 .stat-col span { color: #000; font-weight: 900; font-size: 14px; margin-bottom: 5px; }
 
 .bar {
-    width: 100%; max-width: 40px; min-height: 5px;
-    border-radius: 5px 5px 0 0;
-    transition: height 0.5s ease;
+    width: 100%; max-width: 45px; min-height: 5px;
+    border-radius: 6px 6px 0 0;
+    transition: height 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-.r-bar { background: var(--red); }
-.b-bar { background: var(--blue); }
-.y-bar { background: var(--yellow); }
-.g-bar { background: var(--green); }
+.r-bar { background: var(--red); } .b-bar { background: var(--blue); }
+.y-bar { background: var(--yellow); } .g-bar { background: var(--green); }
 
-/* Списки */
 .scroll-list {
     width: 100%;
     max-width: 550px;
     overflow-y: auto;
-    max-height: 45vh;
+    max-height: 40vh;
     padding: 5px;
 }
 
@@ -338,57 +339,91 @@ html, body {
     background: rgba(255,255,255,0.15);
     width: 100%;
     padding: 15px 20px;
-    margin: 6px 0;
+    margin: 8px 0;
     border-radius: 10px;
     display: flex;
     justify-content: space-between;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-weight: 800;
-    border-left: 8px solid var(--accent);
+    border-left: 10px solid var(--white);
     animation: slideIn 0.4s ease-out;
 }
 
 .place-1 { background: linear-gradient(45deg, #ffd700, #ff8c00) !important; color: #000; border: none; }
 
 /* ============================================================
-   9. МОБИЛЬНАЯ АДАПТАЦИЯ (Small Phones Fix)
+   9. МОДАЛЬНОЕ ОКНО ДОНАТА
+   ============================================================ */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(10px);
+    z-index: 100000;
+    display: flex;
+    justify-content: center; align-items: center;
+    padding: 20px;
+}
+
+.modal-card {
+    background: white;
+    padding: 30px;
+    border-radius: 25px;
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
+    color: #333;
+    animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.qr-box {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 15px;
+    margin: 20px 0;
+}
+
+.qr-box img { width: 200px; height: 200px; display: block; margin: auto; }
+
+/* ============================================================
+   10. МОБИЛЬНАЯ АДАПТАЦИЯ (iPhone SE / Small Android)
    ============================================================ */
 @media (max-width: 650px) {
     .answers-grid {
         grid-template-columns: 1fr;
         grid-template-rows: repeat(4, 1fr);
     }
-    .ans-btn { height: 60px; padding: 0 15px; }
-    .game-hud { margin-top: 120px; }
-    .timer-orb { width: 65px; height: 65px; font-size: 1.8rem; border-width: 4px; }
+    .ans-btn { height: 12vh; min-height: 60px; padding: 10px 20px; }
+    .ans-btn .s { font-size: 2.2rem; }
+    .game-hud { margin-top: 130px; }
+    .timer-orb { width: 75px; height: 75px; font-size: 2rem; border-width: 5px; }
     .k-logo { font-size: 3.5rem; }
 }
 
 /* ============================================================
-   10. АНИМАЦИИ
+   11. АНИМАЦИИ
    ============================================================ */
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes pop { 0% { transform: scale(0.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 @keyframes slideIn { from { transform: translateX(-30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
 .pulse { animation: pulseAnim 1.5s infinite alternate; }
 @keyframes pulseAnim { from { transform: scale(1); } to { transform: scale(1.05); opacity: 0.8; } }
 
-/* Индикатор имени игрока (в углу) */
 .player-identity {
     position: fixed;
-    bottom: 10px;
+    bottom: env(safe-area-inset-bottom, 10px);
     right: 10px;
     background: var(--white);
     color: var(--black);
     padding: 6px 15px;
     border-radius: 20px;
     font-weight: 900;
-    font-size: 12px;
-    z-index: 2000;
+    font-size: 11px;
+    z-index: 5000;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 
-/* Стилизация скроллбара */
+/* Кастомный скроллбар */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
