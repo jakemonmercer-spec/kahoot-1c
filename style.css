@@ -105,34 +105,25 @@ html, body {
 
 .glass-card {
     background: var(--white);
-    padding: clamp(15px, 5vw, 35px);
-    border-radius: 18px;
+    padding: clamp(20px, 6vw, 40px); /* Увеличил отступы */
+    border-radius: 24px;
     width: 100%;
     max-width: 360px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    text-align: center;
 }
 
-.glass-card input {
-    width: 100%;
-    padding: 15px;
-    font-size: 1.1rem;
-    border: 2px solid #eee;
-    border-radius: 10px;
-    margin-bottom: 12px;
-    text-align: center;
-    color: #333;
-    font-weight: 800;
-}
 
 .btn-hit {
     width: 100%;
     background: var(--dark);
     color: var(--white);
-    padding: 18px;
+    padding: 22px;
     border: none;
     border-radius: 10px;
     font-weight: 900;
-    font-size: 1.2rem;
+    font-size: 1.4rem;
+    letter-spacing: 1px;
     cursor: pointer;
     box-shadow: 0 5px 0 #000;
     transition: 0.1s;
