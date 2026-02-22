@@ -1,85 +1,51 @@
 /* ============================================================
-   1. ШРИФТЫ И ЯДРО ПЕРЕМЕННЫХ
+   1. ИМПОРТ И ПЕРЕМЕННЫЕ (Цветовая схема 1С/Kahoot)
    ============================================================ */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-    --bg-main: #46178f;     /* Фирменный фиолетовый */
+    --bg-color: #46178f;     /* Основной фиолетовый */
     --accent: #ffcc00;       /* Желтый акцент */
-    --red: #e21b3c;          /* Красный ▲ */
-    --blue: #1368ce;         /* Синий ◆ */
-    --yellow: #ffa600;       /* Золотой ● */
-    --green: #26890c;        /* Зеленый ■ */
+    --red: #e21b3c;          /* Красный вариант ▲ */
+    --blue: #1368ce;         /* Синий вариант ◆ */
+    --yellow: #ffa600;       /* Золотой вариант ● */
+    --green: #26890c;        /* Зеленый вариант ■ */
     --white: #ffffff;
     --black: #000000;
-    --glass: rgba(255, 255, 255, 0.15);
-    --glass-border: rgba(255, 255, 255, 0.3);
+    --dark-card: #111111;
+    --glass: rgba(255, 255, 255, 0.12);
+    --glass-border: rgba(255, 255, 255, 0.2);
     --font-main: 'Montserrat', sans-serif;
 }
 
 /* ============================================================
-   2. ГЛОБАЛЬНАЯ ЗАЩИТА И СБРОС (ANTI-ZOOM & PWA)
+   2. ГЛОБАЛЬНАЯ ЗАЩИТА ОТ МАСШТАБИРОВАНИЯ (ANTI-ZOOM)
    ============================================================ */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    /* touch-action: manipulation — отключает системный зум при двойном клике */
+    /* touch-action: manipulation — отключает зум при двойном тапе на большинстве смартфонов */
     touch-action: manipulation; 
-    -webkit-tap-highlight-color: transparent;
+    -webkit-tap-highlight-color: transparent; /* Убирает синий блик при клике на Android */
     -webkit-font-smoothing: antialiased;
 }
 
 html, body {
-    /* dvh (Dynamic Viewport Height) — критично для мобильных браузеров */
+    /* dvh — Dynamic Viewport Height: учитывает панели браузеров на iPhone и Android */
     height: 100dvh;
     width: 100%;
-    background-color: var(--bg-main);
+    background-color: var(--bg-color);
     color: var(--white);
     font-family: var(--font-main);
-    /* Полный запрет прокрутки страницы, чтобы не было "дерганий" */
+    /* Запрет скролла всей страницы, чтобы она не "прыгала" */
     overflow: hidden; 
     position: fixed;
-    user-select: none; /* Запрет выделения текста */
+    user-select: none; /* Запрет выделения текста, чтобы не мешало кликать */
 }
 
 /* ============================================================
-   3. ИНДИКАТОР АКТИВНОСТИ (LABEL) — СВЯЗКА ВСЕХ ИГРОКОВ
-   ============================================================ */
-#status-bar-players {
-    position: fixed;
-    top: 55px; /* Сразу под админкой */
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(10px);
-    padding: 6px 18px;
-    border-radius: 25px;
-    font-size: clamp(10px, 2.5vw, 13px);
-    font-weight: 700;
-    z-index: 900;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    width: auto;
-    max-width: 85%;
-    white-space: nowrap;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-}
-
-.indicator { color: #00ff00; animation: blink 1s infinite; }
-#players-names-line { 
-    overflow: hidden; 
-    text-overflow: ellipsis; 
-    color: var(--accent); 
-    font-style: italic;
-}
-
-@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-
-/* ============================================================
-   4. АДМИН-ПАНЕЛЬ (TOP BAR)
+   3. ВЕРХНЯЯ ПАНЕЛЬ АДМИНИСТРАТОРА
    ============================================================ */
 #admin-pwa-bar {
     height: 50px;
@@ -94,80 +60,88 @@ html, body {
 }
 
 #admin-pwa-bar input[type="password"] {
-    width: 60px;
+    width: 70px;
     height: 30px;
-    background: #222;
-    color: white;
+    padding: 5px;
+    font-size: 14px;
+    border-radius: 5px;
     border: none;
-    border-radius: 4px;
+    background: #222;
+    color: #fff;
     text-align: center;
-    font-weight: bold;
 }
 
 #admin-pwa-bar button {
     border: none;
-    padding: 8px 15px;
+    padding: 8px 14px;
     border-radius: 5px;
     font-weight: 800;
     cursor: pointer;
-    font-size: 10px;
+    font-size: 11px;
     text-transform: uppercase;
     margin-left: 5px;
-    transition: 0.2s;
+    transition: 0.2s ease;
 }
+
+#admin-pwa-bar button:active { transform: scale(0.9); }
 
 .primary { background: var(--green); color: white; }
 .danger { background: #333; color: var(--red); }
 
 /* ============================================================
-   5. ОБОЛОЧКА ПРИЛОЖЕНИЯ
+   4. ОСНОВНОЙ КОНТЕЙНЕР ПРИЛОЖЕНИЯ
    ============================================================ */
 #app-viewport {
     height: calc(100dvh - 50px);
     width: 100%;
     position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .screen {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    display: none;
+    display: none; /* По умолчанию скрыты */
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: clamp(10px, 4vw, 30px);
+    text-align: center;
 }
 
 .screen.active {
-    display: flex;
-    animation: fadeIn 0.4s ease-out;
+    display: flex; /* Показываем только активный экран */
+    animation: screenIn 0.4s ease-out forwards;
 }
 
 /* ============================================================
-   6. ЛОББИ И ВХОД (LOBBY)
+   5. ЛОББИ И ВХОД (LOBBY)
    ============================================================ */
 .k-logo {
     font-size: clamp(2.5rem, 12vw, 6rem);
     font-weight: 900;
-    margin-bottom: 20px;
-    text-shadow: 0 10px 20px rgba(0,0,0,0.4);
+    margin-bottom: 2vh;
+    text-shadow: 0 8px 15px rgba(0,0,0,0.3);
+    animation: float 4s ease-in-out infinite;
 }
 
 .glass-card {
     background: var(--white);
-    padding: 25px;
+    padding: clamp(20px, 5vw, 40px);
     border-radius: 20px;
     width: 100%;
     max-width: 380px;
-    box-shadow: var(--shadow-soft);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.5);
 }
 
 .glass-card input {
     width: 100%;
-    padding: 15px;
+    padding: 18px;
     font-size: 1.2rem;
-    border: 2px solid #ddd;
-    border-radius: 10px;
+    border: 2px solid #eeeeee;
+    border-radius: 12px;
     margin-bottom: 12px;
     text-align: center;
     color: #333;
@@ -177,50 +151,59 @@ html, body {
 
 .btn-hit {
     width: 100%;
-    background: var(--dark-grey);
+    background: var(--dark-card);
     color: var(--white);
-    padding: 18px;
+    padding: 20px;
     border: none;
     border-radius: 12px;
     font-weight: 900;
-    font-size: 1.3rem;
+    font-size: 1.4rem;
     cursor: pointer;
-    box-shadow: 0 5px 0 #000;
-    transition: 0.1s;
+    box-shadow: 0 6px 0 #000;
+    transition: 0.1s ease;
 }
 
-.btn-hit:active { transform: translateY(3px); box-shadow: 0 2px 0 #000; }
+.btn-hit:active { transform: translateY(4px); box-shadow: 0 2px 0 #000; }
 
-/* Список игроков в лобби */
+.pulse-text { 
+    margin-top: 20px; 
+    font-weight: 800; 
+    font-size: 14px; 
+    animation: pulseText 1.5s infinite; 
+}
+
+/* Облако ников в лобби */
 .scroll-zone {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
     justify-content: center;
-    margin-top: 40px;
+    margin-top: 25px;
     overflow-y: auto;
-    max-height: 25vh;
     width: 100%;
+    max-width: 900px;
+    max-height: 25vh; /* Ограничиваем, чтобы не вылетало */
+    padding: 10px;
 }
 
 .tag {
     background: var(--glass);
-    border: 1px solid var(--glass-border);
+    border: 2px solid var(--glass-border);
     padding: 8px 16px;
-    border-radius: 5px;
+    border-radius: 6px;
     font-weight: 700;
-    font-size: 14px;
-    animation: pop 0.4s ease;
+    font-size: 1.1rem;
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 /* ============================================================
-   7. ЭКРАН ВОПРОСА (GAME)
+   6. ЭКРАН ВОПРОСА (GAME)
    ============================================================ */
 .question-overlay {
     background: var(--white);
-    color: #000;
+    color: var(--black);
     width: 100%;
-    padding: clamp(15px, 4vh, 30px);
+    padding: clamp(15px, 4vh, 35px);
     position: fixed;
     top: 50px;
     left: 0;
@@ -231,6 +214,7 @@ html, body {
 .question-overlay h2 {
     font-size: clamp(1rem, 4.5vw, 1.8rem);
     font-weight: 800;
+    line-height: 1.2;
 }
 
 .game-hud {
@@ -239,63 +223,70 @@ html, body {
     align-items: center;
     width: 100%;
     max-width: 1100px;
-    margin-top: 140px;
+    margin-top: clamp(120px, 25vh, 180px);
     margin-bottom: 20px;
 }
 
 .timer-orb {
-    font-size: clamp(2rem, 8vw, 3.5rem);
+    font-size: clamp(2.5rem, 8vw, 4rem);
     font-weight: 900;
-    width: 90px; height: 90px;
-    border: 6px solid var(--white);
+    width: clamp(80px, 18vw, 110px);
+    height: clamp(80px, 18vw, 110px);
+    border: 8px solid var(--white);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0,0,0,0.2);
+    background: rgba(0,0,0,0.3);
 }
 
 .stats-pill {
-    background: rgba(0,0,0,0.4);
-    padding: 10px 20px;
-    border-radius: 30px;
-    font-weight: 700;
+    background: rgba(0,0,0,0.5);
+    padding: 10px 25px;
+    border-radius: 40px;
+    font-weight: 800;
+    font-size: 1.1rem;
 }
 
-/* СЕТКА ОТВЕТОВ */
+/* СЕТКА КНОПОК ОТВЕТОВ */
 .answers-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr; /* По умолчанию для ПК/Планшета */
     gap: 12px;
     width: 100%;
     max-width: 1200px;
-    flex: 1;
-    margin-bottom: 10px;
+    flex: 1; /* Растягивается под доступное место */
+    margin-bottom: env(safe-area-inset-bottom, 15px);
 }
 
 .ans-btn {
     border: none;
     border-radius: 12px;
     color: var(--white);
-    font-size: clamp(0.9rem, 3.5vw, 1.5rem);
+    font-size: clamp(0.9rem, 3.5vw, 1.6rem);
     font-weight: 800;
     display: flex;
     align-items: center;
     padding: 0 30px;
     cursor: pointer;
-    box-shadow: 0 5px 0 rgba(0,0,0,0.15);
+    box-shadow: 0 6px 0 rgba(0,0,0,0.2);
+    transition: transform 0.1s;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
 }
+
+.ans-btn:active { transform: translateY(4px); box-shadow: none; filter: brightness(1.2); }
 
 .ans-btn.r { background: var(--red); }
 .ans-btn.b { background: var(--blue); }
 .ans-btn.y { background: var(--yellow); }
 .ans-btn.g { background: var(--green); }
 
-.ans-btn:active { transform: translateY(3px); box-shadow: none; filter: brightness(1.1); }
-.ans-btn .s { font-size: 2.5rem; margin-right: 15px; opacity: 0.8; }
+.ans-btn .s { font-size: 3rem; margin-right: 20px; opacity: 0.85; }
 
 /* ============================================================
-   8. СТАТИСТИКА И РЕЙТИНГИ
+   7. СТАТИСТИКА И РЕЙТИНГИ (RESULTS)
    ============================================================ */
 .feedback-card {
     background: var(--white);
@@ -311,119 +302,151 @@ html, body {
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    gap: 15px;
-    height: 120px;
+    gap: clamp(10px, 4vw, 25px);
+    height: 140px;
     margin-top: 15px;
 }
 
 .stat-col { display: flex; flex-direction: column; align-items: center; flex: 1; }
-.stat-col span { color: #000; font-weight: 900; font-size: 14px; margin-bottom: 5px; }
+.stat-col span.stat-num { color: #000; font-weight: 900; margin-bottom: 5px; }
 
 .bar {
-    width: 100%; max-width: 45px; min-height: 5px;
+    width: 100%;
+    max-width: 45px;
+    min-height: 5px;
     border-radius: 6px 6px 0 0;
-    transition: height 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* Плавный рост графика */
+    transition: height 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 .r-bar { background: var(--red); } .b-bar { background: var(--blue); }
 .y-bar { background: var(--yellow); } .g-bar { background: var(--green); }
 
+.shape-label { margin-top: 8px; font-size: 14px; font-weight: 900; opacity: 0.5; }
+
+/* Прокручиваемый список рейтинга */
 .scroll-list {
     width: 100%;
     max-width: 550px;
     overflow-y: auto;
     max-height: 40vh;
-    padding: 5px;
+    padding: 10px;
 }
 
 .podium-row {
     background: rgba(255,255,255,0.15);
     width: 100%;
-    padding: 15px 20px;
+    padding: clamp(12px, 3vh, 22px) 25px;
     margin: 8px 0;
-    border-radius: 10px;
+    border-radius: 12px;
     display: flex;
     justify-content: space-between;
     font-size: 1.2rem;
     font-weight: 800;
     border-left: 10px solid var(--white);
-    animation: slideIn 0.4s ease-out;
+    animation: slideIn 0.5s ease-out both;
 }
 
-.place-1 { background: linear-gradient(45deg, #ffd700, #ff8c00) !important; color: #000; border: none; }
+.place-1 { 
+    background: linear-gradient(45deg, #ffd700, #ff8c00) !important; 
+    color: #000; 
+    transform: scale(1.03); 
+    border: none;
+}
 
 /* ============================================================
-   9. МОДАЛЬНОЕ ОКНО ДОНАТА
+   8. МОДАЛЬНОЕ ОКНО ПОЖЕРТВОВАНИЯ (DONATION)
    ============================================================ */
 .modal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.85);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px); /* Размытие фона */
     z-index: 100000;
     display: flex;
-    justify-content: center; align-items: center;
+    justify-content: center;
+    align-items: center;
     padding: 20px;
 }
 
 .modal-card {
     background: white;
-    padding: 30px;
-    border-radius: 25px;
+    padding: 35px;
+    border-radius: 30px;
     width: 100%;
     max-width: 380px;
     text-align: center;
     color: #333;
-    animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.qr-box {
+.qr-container {
     background: #f9f9f9;
     padding: 15px;
     border-radius: 15px;
     margin: 20px 0;
+    display: inline-block;
+    border: 2px dashed #ddd;
 }
 
-.qr-box img { width: 200px; height: 200px; display: block; margin: auto; }
+.qr-container img {
+    display: block;
+    width: 220px;
+    height: 220px;
+    border-radius: 8px;
+}
 
 /* ============================================================
-   10. МОБИЛЬНАЯ АДАПТАЦИЯ (iPhone SE / Small Android)
+   9. АДАПТАЦИЯ ПОД ТЕЛЕФОНЫ (SMALL SCREENS FIX)
    ============================================================ */
 @media (max-width: 650px) {
     .answers-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr; /* Одна кнопка в ряду на мобилках */
         grid-template-rows: repeat(4, 1fr);
     }
-    .ans-btn { height: 12vh; min-height: 60px; padding: 10px 20px; }
-    .ans-btn .s { font-size: 2.2rem; }
-    .game-hud { margin-top: 130px; }
-    .timer-orb { width: 75px; height: 75px; font-size: 2rem; border-width: 5px; }
-    .k-logo { font-size: 3.5rem; }
+    
+    .ans-btn { height: auto; min-height: 65px; padding: 10px 20px; }
+    .ans-btn .s { font-size: 2rem; margin-right: 15px; }
+    .game-hud { margin-top: 110px; }
+    .timer-orb { width: 70px; height: 70px; font-size: 1.8rem; border-width: 5px; }
+    .k-logo { font-size: 3.2rem; }
+    .question-overlay { padding: 15px; }
 }
 
 /* ============================================================
-   11. АНИМАЦИИ
+   10. АНИМАЦИИ (VISUAL EFFECTS)
    ============================================================ */
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes pop { 0% { transform: scale(0.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes screenIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+@keyframes popIn { 0% { transform: scale(0.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 @keyframes slideIn { from { transform: translateX(-30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes pulseText { from { opacity: 1; } to { opacity: 0.5; } }
 
-.pulse { animation: pulseAnim 1.5s infinite alternate; }
-@keyframes pulseAnim { from { transform: scale(1); } to { transform: scale(1.05); opacity: 0.8; } }
+.pulse-animation { animation: pulseAnim 1.2s infinite alternate; }
+@keyframes pulseAnim { from { transform: scale(1); } to { transform: scale(1.05); } }
 
+/* Кастомный индикатор игрока */
 .player-identity {
     position: fixed;
     bottom: env(safe-area-inset-bottom, 10px);
     right: 10px;
     background: var(--white);
     color: var(--black);
-    padding: 6px 15px;
-    border-radius: 20px;
+    padding: 8px 20px;
+    border-radius: 30px;
     font-weight: 900;
-    font-size: 11px;
+    font-size: 13px;
     z-index: 5000;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    border: 3px solid var(--bg-color);
 }
 
-/* Кастомный скроллбар */
-::-webkit-scrollbar { width: 4px; }
+.confetti {
+    position: absolute;
+    width: 10px; height: 10px;
+    z-index: 998;
+    pointer-events: none;
+}
+
+/* Стилизация скроллбара */
+::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
