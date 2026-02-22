@@ -1,84 +1,86 @@
-// ============================================================
-// 1. БАЗА ДАННЫХ: 12 ВОПРОСОВ (7 по Лабе №6 + 5 Базовых)
-// ============================================================
+// ==========================================
+// 1. БАЗА ДАННЫХ ВОПРОСОВ (12 ШТУК)
+// ==========================================
 
 const QUIZ_DATA = [
+    // --- Вопросы из Лабораторной №6 (7 шт) ---
     { 
         q: "Для чего предназначен объект конфигурации «Отчет»?", 
-        a: ["Для хранения паролей пользователей", "Для анализа данных и вывода сводной информации", "Для ввода новых сотрудников в базу", "Для удаления истории изменений"], 
+        a: ["Для хранения паролей", "Для анализа данных и вывода сводных таблиц", "Для ввода новых сотрудников", "Для удаления базы"], 
         c: 1 
     },
     { 
-        q: "Как создать отчет с помощью конструктора (СКД)?", 
-        a: ["Написать код в Модуле объекта", "Использовать стандартный Макет", "Добавить объект 'Отчет' и настроить Схему компоновки", "Создать текстовый файл"], 
+        q: "Как создать отчет с помощью конструктора без написания кода?", 
+        a: ["Через Модуль объекта", "Использовать Макет", "Через СКД (Схему компоновки данных)", "Написать в блокноте"], 
         c: 2 
     },
     { 
         q: "Что такое виртуальная таблица «ОстаткиИОбороты»?", 
-        a: ["Список всех картинок интерфейса", "Таблица, которая сама считает приход, расход и остатки", "Архив удаленных документов", "Таблица для внутреннего чата"], 
+        a: ["Список всех картинок", "Таблица, считающая приход, расход и остатки", "Архив старых документов", "Таблица для чата"], 
         c: 1 
     },
     { 
-        q: "Какие поля нужно выбрать для отчета «Материалы» в Лабе №6?", 
-        a: ["Цвет, Размер и Вес", "Склад, Материал, Остатки и Обороты", "Имя директора и его телефон", "Адрес склада"], 
+        q: "Какие поля критически важны для отчета «Материалы»?", 
+        a: ["Цвет и Размер", "Склад, Материал, Остатки и Обороты", "Имя директора и телефон", "Адрес магазина"], 
         c: 1 
     },
     { 
         q: "Для чего нужны параметры «Начало периода» и «Конец периода»?", 
-        a: ["Для украшения интерфейса", "Чтобы ограничить данные отчета конкретными датами", "Для регистрации нового пользователя", "Для ускорения работы браузера"], 
+        a: ["Для красоты", "Чтобы задать временной период для отчета", "Для регистрации пользователя", "Для ускорения программы"], 
         c: 1 
     },
     { 
-        q: "Как отобразить отчет в разделах (Бухгалтерия, Учет материалов)?", 
-        a: ["Создать ссылку на рабочем столе", "Отметить нужные разделы на вкладке «Подсистемы»", "Написать макрос в Excel", "Просто нажать кнопку Сохранить"], 
+        q: "Как сделать так, чтобы команда отчета появилась в меню программы?", 
+        a: ["Создать ярлык", "Отметить нужные разделы на вкладке «Подсистемы»", "Написать в поддержку", "Просто сохранить файл"], 
         c: 1 
     },
     { 
-        q: "Как проверить работу отчета в режиме 1С:Предприятие?", 
-        a: ["Нажать кнопку «Сформировать»", "Нажать кнопку «Пуск» в Windows", "Зайти в меню Справочники", "Удалить все документы из базы"], 
+        q: "Какую кнопку нужно нажать в 1С, чтобы отчет вывел данные на экран?", 
+        a: ["«Сформировать»", "«Пуск»", "«Записать и закрыть»", "«Провести»"], 
         c: 0 
     },
-    { 
-        q: "Как называется режим, в котором программист создает структуру базы?", 
-        a: ["Пользовательский режим", "Конфигуратор", "1С:Предприятие", "Браузерный режим"], 
-        c: 1 
-    },
-    { 
-        q: "Какой основной фирменный цвет логотипа системы 1С?", 
-        a: ["Ярко-синий", "Желто-оранжевый", "Темно-зеленый", "Черный"], 
-        c: 1 
-    },
+    // --- Базовые вопросы про 1С:Предприятие (5 шт) ---
     { 
         q: "Как называется компания-разработчик системы «1С:Предприятие»?", 
-        a: ["Фирма 1С", "Корпорация Microsoft", "Google LLC", "Apple Inc"], 
+        a: ["1С", "Microsoft", "Oracle", "SAP"], 
         c: 0 
     },
     { 
-        q: "В каком объекте 1С хранятся списки (например, товары или клиенты)?", 
-        a: ["Справочники", "Документы", "Регистры накопления", "Макеты"], 
+        q: "Какой основной фирменный цвет интерфейса и логотипа 1С?", 
+        a: ["Синий", "Желтый", "Зеленый", "Черный"], 
+        c: 1 
+    },
+    { 
+        q: "В каком режиме программист пишет код и создает структуру базы?", 
+        a: ["Пользовательский режим", "Конфигуратор", "Режим отладки", "Браузер"], 
+        c: 1 
+    },
+    { 
+        q: "Какой объект в 1С используется для хранения списков (например, товаров)?", 
+        a: ["Справочник", "Документ", "Отчет", "Константа"], 
         c: 0 
     },
     { 
-        q: "Какой объект в 1С фиксирует событие (например, факт продажи товара)?", 
-        a: ["Отчет", "Документ", "Константа", "Стиль"], 
+        q: "Какой объект в 1С фиксирует событие хозяйственной жизни (например, продажу)?", 
+        a: ["Регистр", "Документ", "Макет", "План счетов"], 
         c: 1 
     }
 ];
 
-// ============================================================
-// 2. СПИСОК 30 ЖИВОТНЫХ ДЛЯ АВТОМАТИЧЕСКОГО ВХОДА
-// ============================================================
+// ==========================================
+// 2. ИМЕНА-ЗАГЛУШКИ ДЛЯ ОПОЗДАВШИХ
+// ==========================================
 
 const ANIMAL_NAMES = [
     "Мудрый Кот", "Быстрый Гепард", "Сонная Панда", "Грозный Тигр", "Хитрый Лис", 
-    "Смелый Лев", "Тихий Волк", "Веселый Енот", "Гордый Орел", "Умная Сова",
+    "Смелый Лев", "Тихий Волк", "Веселый Енот", "Гордый Орел", "Умный Сова",
     "Яркий Попугай", "Добрый Слон", "Ловкий Мангуст", "Крутой Бобер", "Синий Кит",
     "Золотой Олень", "Снежный Барс", "Дикий Кабан", "Вольный Конь", "Лесной Олень",
     "Черный Гриф", "Белый Медведь", "Рыжая Белка", "Стальной Зубр", "Быстрый Заяц",
     "Зоркий Сокол", "Могучий Лось", "Пятнистый Жираф", "Речная Выдра", "Горный Козел"
 ];
 
-// Глобальное состояние игры
+// Глобальное состояние игры на устройстве
 let state = {
     myNick: localStorage.getItem('quiz_nick') || "",
     currentQIdx: -1,
@@ -87,88 +89,88 @@ let state = {
     serverOffset: 0
 };
 
-// Получаем смещение времени с серверами Google для устранения ошибки NaN
+// Вычисляем смещение времени с серверами Google для устранения ошибки NaN
 db.ref('.info/serverTimeOffset').on('value', snap => {
     state.serverOffset = snap.val() || 0;
 });
 
-// ============================================================
-// 3. ЛОГИКА ИГРОКА (USER ENGINE)
-// ============================================================
+// ==========================================
+// 3. ЛОГИКА ИГРОКА (USER)
+// ==========================================
 
 const User = {
-    // Автоматический вход (срабатывает сразу при открытии ссылки)
-    async autoJoin() {
+    async join() {
+        // Инициализация звука после первого взаимодействия с экраном
         if (typeof SoundEngine !== 'undefined') SoundEngine.init();
         
-        // Если ника нет в памяти — даем случайное животное
-        if (!state.myNick) {
-            const randomAnimal = ANIMAL_NAMES[Math.floor(Math.random() * ANIMAL_NAMES.length)];
-            state.myNick = randomAnimal + " #" + Math.floor(Math.random() * 100);
-            localStorage.setItem('quiz_nick', state.myNick);
-        }
-
-        const playerRef = db.ref('players/' + state.myNick);
+        let inputField = document.getElementById('p-nick');
+        let nameToUse = inputField ? inputField.value.trim() : "";
         
-        // Регистрируем в базе (счет 0, выбор -1)
-        await playerRef.update({ 
+        // Автогенерация имени, если пусто или игрок зашел в середине игры
+        if (!nameToUse) {
+            const randomAnimal = ANIMAL_NAMES[Math.floor(Math.random() * ANIMAL_NAMES.length)];
+            nameToUse = randomAnimal + " #" + Math.floor(Math.random() * 1000); // Добавили ID для уникальности
+        }
+        
+        // Защита от системных ошибок
+        if (nameToUse === "undefined") nameToUse = "Студент #" + Math.floor(Math.random() * 1000);
+
+        state.myNick = nameToUse;
+        localStorage.setItem('quiz_nick', state.myNick);
+
+        // Гарантированно создаем запись игрока со счетом 0 и пустым выбором
+        const playerRef = db.ref('players/' + state.myNick);
+        await playerRef.set({ 
             score: 0, 
             lastChoice: -1,
             lastActive: firebase.database.ServerValue.TIMESTAMP 
         });
 
-        // Удаление из базы при закрытии вкладки или потере интернета
+        // Контроль активности: удаляем при закрытии страницы
         playerRef.onDisconnect().remove();
 
+        if (typeof SoundEngine !== 'undefined') SoundEngine.playTap();
         this.renderIdentity();
-        console.log("Joined as: " + state.myNick);
         
-        // Обновляем визуальное отображение ника в лобби
-        const nameDisp = document.getElementById('current-name-display');
-        if (nameDisp) nameDisp.innerText = "Ваш текущий ник: " + state.myNick;
-    },
-
-    // Ручное изменение имени
-    async manualJoin() {
-        const newNick = document.getElementById('p-nick').value.trim();
-        if (!newNick) return alert("Пожалуйста, введите имя!");
-        
-        // Удаляем старое имя из базы перед сменой
-        if (state.myNick) db.ref('players/' + state.myNick).remove();
-        
-        state.myNick = newNick;
-        localStorage.setItem('quiz_nick', state.myNick);
-        this.autoJoin(); // Перезаходим
+        const joinCard = document.getElementById('join-card');
+        if (joinCard) {
+            joinCard.innerHTML = `<h2 style="color:#333; font-weight:900;">ВЫ В ИГРЕ!<br><small style="color:#46178f">${state.myNick}</small></h2>`;
+        }
     },
 
     renderIdentity() {
-        let idTag = document.getElementById('player-id-tag');
+        if (!state.myNick || state.myNick === "undefined") return;
+        let idTag = document.getElementById('player-identity-tag');
         if (!idTag) {
             idTag = document.createElement('div');
-            idTag.id = 'player-id-tag';
+            idTag.id = 'player-identity-tag';
             idTag.className = 'player-identity';
             document.body.appendChild(idTag);
         }
-        idTag.innerText = `Вы: ${state.myNick}`;
+        idTag.innerText = `👤 ${state.myNick}`;
     },
 
     hit(idx) {
-        if (!state.canHit || !state.myNick) return;
+        if (!state.canHit || !state.myNick || state.myNick === "undefined") return;
         state.canHit = false;
+        
         if (typeof SoundEngine !== 'undefined') SoundEngine.playTap();
         
-        // Визуально блокируем сетку
+        // Визуально блокируем кнопки
         const grid = document.getElementById('ans-grid');
         if (grid) grid.style.opacity = "0.3";
 
-        // Отправляем выбор в базу для статистики (графиков)
+        // Мгновенная запись выбора для статистики (графики)
         db.ref('players/' + state.myNick + '/lastChoice').set(idx);
 
+        // Логика проверки правильности
         if (idx === QUIZ_DATA[state.currentQIdx].c) {
             let timerEl = document.getElementById('timer-sec');
             let timeLeft = timerEl ? parseInt(timerEl.innerText) : 0;
-            // Расчет: 500 база + бонус за скорость
-            let points = 500 + (isNaN(timeLeft) ? 0 : timeLeft * 25);
+            if (isNaN(timeLeft)) timeLeft = 0; // Защита от NaN
+
+            // Начисление баллов: База 500 + Бонус за скорость
+            let points = 500 + (timeLeft * 25);
             db.ref('players/' + state.myNick + '/score').transaction(s => (s || 0) + points);
             if (typeof SoundEngine !== 'undefined') SoundEngine.playCorrect();
         } else {
@@ -177,196 +179,242 @@ const User = {
     }
 };
 
-// ============================================================
-// 4. ЛОГИКА АДМИНИСТРАТОРА (ADMIN ENGINE)
-// ============================================================
+// ==========================================
+// 4. ЛОГИКА АДМИНА И АВТОПИЛОТ (ADMIN)
+// ==========================================
 
 const Admin = {
     login() {
-        const pinVal = document.getElementById('pin').value;
-        if (pinVal === "123") {
+        const pinInput = document.getElementById('pin');
+        if (pinInput && pinInput.value === "123") {
             document.getElementById('auth-lock').style.display = 'none';
             document.getElementById('adm-tools').style.display = 'flex';
+        } else {
+            alert("Неверный PIN!");
         }
     },
 
     setStep(step) { db.ref('game').update({ step: step }); },
 
     async runAuto() {
-        // Чистим "призраков" перед стартом
+        if (!confirm("ЗАПУСТИТЬ ИГРУ? (Автоматический цикл 12 вопросов)")) return;
+        
+        // Чистим возможные ошибки базы перед стартом
         await db.ref('players/undefined').remove();
 
         for (let i = 0; i < QUIZ_DATA.length; i++) {
-            // Сброс выбора у ВСЕХ игроков перед новым вопросом
+            // Обнуляем выборы у ВСЕХ игроков (чтобы графики строились заново)
             const playersSnap = await db.ref('players').once('value');
             const updates = {};
             playersSnap.forEach(child => { updates[`players/${child.key}/lastChoice`] = -1; });
             await db.ref().update(updates);
 
-            // 1. ПРИГОТОВЬТЕСЬ
-            await db.ref('game').set({ step: 'getready', qIdx: i, serverStartTime: firebase.database.ServerValue.TIMESTAMP });
+            // ЭТАП 1: Приготовьтесь (4 секунды)
+            await db.ref('game').set({ 
+                step: 'getready', 
+                qIdx: i, 
+                serverStartTime: firebase.database.ServerValue.TIMESTAMP 
+            });
             await new Promise(r => setTimeout(r, 4000));
 
-            // 2. ВОПРОС
-            await db.ref('game').update({ step: 'game', serverStartTime: firebase.database.ServerValue.TIMESTAMP });
+            // ЭТАП 2: Вопрос (21 секунда)
+            await db.ref('game').update({ 
+                step: 'game',
+                serverStartTime: firebase.database.ServerValue.TIMESTAMP 
+            });
             await new Promise(r => setTimeout(r, 21000));
 
-            // 3. РЕЗУЛЬТАТЫ
+            // ЭТАП 3: Статистика и результаты (6.5 секунд)
             await db.ref('game').update({ step: 'results' });
             await new Promise(r => setTimeout(r, 6500));
         }
+        
+        // ФИНАЛ
         db.ref('game').update({ step: 'podium' });
     },
 
-    async reset() {
-        if (confirm("ВНИМАНИЕ! Это очистит кэш у всех игроков и сбросит систему. Продолжить?")) {
-            await db.ref('game/step').set('global-reset');
-            setTimeout(() => {
-                db.ref('/').set({ game: { step: 'lobby', qIdx: -1 }, players: {} });
-                localStorage.clear();
-                location.reload();
-            }, 500);
+    reset() {
+        if (confirm("ВНИМАНИЕ! Полный сброс базы данных. Удалить всех игроков и очки?")) {
+            db.ref('/').set({ game: { step: 'lobby', qIdx: -1 }, players: {} });
+            localStorage.clear();
+            location.reload();
         }
     }
 };
 
-// ============================================================
-// 5. СИНХРОНИЗАЦИЯ ТАЙМЕРА (GOOGLE SERVER TIME)
-// ============================================================
+// ==========================================
+// 5. ИДЕАЛЬНЫЙ СИНХРОННЫЙ ТАЙМЕР
+// ==========================================
 
-function startSyncTimer(startTime) {
+function startSyncTimer(serverStartTime) {
     clearInterval(state.syncTimer);
-    if (!startTime) return;
-    
+    if (!serverStartTime) return;
+
     state.syncTimer = setInterval(() => {
-        // Рассчитываем точное время на основе смещения сервера
-        const elapsed = Math.floor(((Date.now() + state.serverOffset) - startTime) / 1000);
+        // Учитываем разницу во времени между телефоном и сервером
+        const nowServer = Date.now() + state.serverOffset;
+        const elapsed = Math.floor((nowServer - serverStartTime) / 1000);
         let left = 20 - elapsed;
         
         if (left < 0) left = 0;
         
         const el = document.getElementById('timer-sec');
         if (el) {
+            // Если расчет не удался, показываем 20, а не NaN
             el.innerText = isNaN(left) ? "20" : left;
+            
+            // Звук тиканья на последних 5 секундах
             if (left <= 5 && left > 0 && typeof SoundEngine !== 'undefined') SoundEngine.playTick();
-            if (left === 0) { 
-                state.canHit = false; 
-                if(document.getElementById('ans-grid')) document.getElementById('ans-grid').style.opacity = "0.3"; 
-                clearInterval(state.syncTimer); 
+            
+            // Время вышло
+            if (left === 0) {
+                state.canHit = false;
+                const grid = document.getElementById('ans-grid');
+                if (grid) grid.style.opacity = "0.3";
+                clearInterval(state.syncTimer);
             }
         }
     }, 1000);
 }
 
-// ============================================================
-// 6. ГЛАВНЫЕ СЛУШАТЕЛИ FIREBASE (SYNC ENGINE)
-// ============================================================
+// ==========================================
+// 6. СЛУШАТЕЛИ FIREBASE (REALTIME РЕНДЕР)
+// ==========================================
 
+// А. Состояние игры (Экраны и Вопросы)
 db.ref('game').on('value', snap => {
     const g = snap.val() || { step: 'lobby', qIdx: -1 };
-    
-    // Сигнал глобального сброса памяти
-    if (g.step === 'global-reset') {
-        localStorage.clear();
-        location.reload();
-        return;
+    state.currentQIdx = g.qIdx;
+
+    // Авто-вход для опоздавших
+    if (!state.myNick && g.step !== 'lobby' && g.step !== 'wait') {
+        User.join(); 
     }
 
-    state.currentQIdx = g.qIdx;
-    
-    // Смена экранов
+    // Переключение экранов
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    const target = document.getElementById('view-' + g.step);
-    if (target) target.classList.add('active');
+    const targetView = document.getElementById('view-' + g.step);
+    if (targetView) targetView.classList.add('active');
 
+    // Отрисовка вопроса
     if (g.step === 'game') {
         state.canHit = true;
-        if(document.getElementById('ans-grid')) document.getElementById('ans-grid').style.opacity = "1";
+        const grid = document.getElementById('ans-grid');
+        if (grid) grid.style.opacity = "1";
         
         const q = QUIZ_DATA[state.currentQIdx];
         if (q) {
             document.getElementById('q-text').innerText = q.q;
-            const btnTs = document.querySelectorAll('.ans-btn .t');
-            q.a.forEach((t, i) => { if (btnTs[i]) btnTs[i].innerText = t; });
+            const btnTexts = document.querySelectorAll('.ans-btn .t');
+            q.a.forEach((text, i) => { if (btnTexts[i]) btnTexts[i].innerText = text; });
         }
+        // Запускаем таймер
         startSyncTimer(g.serverStartTime);
     }
     
+    // Финал
     if (g.step === 'podium') {
         if (typeof SoundEngine !== 'undefined') SoundEngine.playFanfare();
         createConfetti();
     }
 });
 
-// Слушатель игроков (LABEL + РЕЙТИНГ + СТАТИСТИКА)
+// Б. Список игроков (Рейтинг, Лобби, Статистика)
 db.ref('players').on('value', snap => {
     const pData = snap.val() || {};
-    // Фильтруем всех живых игроков
-    const allPlayers = Object.entries(pData).filter(([n]) => n !== "undefined");
-    const sorted = [...allPlayers].sort((a, b) => b[1].score - a[1].score);
     
-    // 1. УМНЫЙ LABEL (ВЕРХНЯЯ ПАНЕЛЬ)
-    const labelCount = document.getElementById('players-online-count');
-    const labelNames = document.getElementById('players-names-line');
-    if (labelCount) labelCount.innerText = allPlayers.length;
-    if (labelNames) {
-        labelNames.innerText = allPlayers.slice(0, 10).map(([n]) => n).join(', ') + (allPlayers.length > 10 ? '...' : '');
-    }
+    // Удаляем мусорные записи
+    if (pData.undefined) db.ref('players/undefined').remove();
 
-    // 2. ОБНОВЛЕНИЕ ЛОББИ (Теги)
+    // Фильтруем и получаем ВСЕХ игроков (даже с 0 баллов)
+    const allPlayers = Object.entries(pData).filter(([name]) => name !== "undefined" && name !== "");
+    
+    // Сортировка по баллами (от большего к меньшему)
+    const sortedPlayers = [...allPlayers].sort((a, b) => b[1].score - a[1].score);
+    
+    // 1. Отрисовка Лобби (Все игроки)
     const lobby = document.getElementById('player-tags');
-    if (lobby) lobby.innerHTML = allPlayers.map(([n]) => `<div class="tag">${n}</div>`).join('');
+    if (lobby) {
+        lobby.innerHTML = allPlayers.map(([n]) => `<div class="tag">${n}</div>`).join('');
+    }
+    
+    const counter = document.getElementById('online-counter');
+    if (counter) counter.innerText = `Подключено: ${allPlayers.length} студентов`;
 
-    // 3. СТАТИСТИКА (ГРАФИКИ СТОЛБИКОВ)
+    // 2. Расчет графиков статистики (Кто что нажал)
     let stats = [0, 0, 0, 0];
-    allPlayers.forEach(([_, d]) => { if (d.lastChoice >= 0) stats[d.lastChoice]++; });
+    allPlayers.forEach(([_, data]) => {
+        if (data.lastChoice !== undefined && data.lastChoice >= 0) {
+            stats[data.lastChoice]++;
+        }
+    });
+
+    // Рисуем столбики
     stats.forEach((count, i) => {
         const bar = document.getElementById(`bar-${i}`);
         const countTxt = document.getElementById(`count-${i}`);
-        if (bar) bar.style.height = (count * 20 + 5) + "px"; 
+        if (bar) bar.style.height = (count * 20 + 5) + "px"; // 20px за каждый голос
         if (countTxt) countTxt.innerText = count;
     });
 
-    // 4. РЕЙТИНГ (ВСЕ ИГРОКИ, ДАЖЕ С 0)
-    const podiumHtml = sorted.map(([n, d], i) => `
+    // 3. Отрисовка Рейтинга (Все участники)
+    let fullRankHtml = sortedPlayers.map(([n, d], i) => `
         <div class="podium-row ${i === 0 && d.score > 0 ? 'place-1' : ''}">
             <span>${i + 1}. ${n}</span>
             <b>${d.score}</b>
         </div>
-    `).join('') || "<div class='tag'>Ждем игроков...</div>";
+    `).join('');
 
-    const roundBox = document.getElementById('round-leaderboard');
-    if (roundBox) roundBox.innerHTML = podiumHtml;
-    const finalBox = document.getElementById('podium-final');
-    if (finalBox) finalBox.innerHTML = podiumHtml;
+    if (allPlayers.length === 0) {
+        fullRankHtml = "<div class='tag'>Ждем игроков...</div>";
+    }
 
-    // 5. СЧЕТЧИК ОТВЕТОВ
-    const ansCount = document.getElementById('ans-count');
-    const actualAns = allPlayers.filter(([_, d]) => d.lastChoice >= 0).length;
-    if (ansCount) ansCount.innerText = actualAns;
+    const roundLeaderboard = document.getElementById('round-leaderboard');
+    if (roundLeaderboard) roundLeaderboard.innerHTML = fullRankHtml;
+    
+    const podiumFinal = document.getElementById('podium-final');
+    if (podiumFinal) podiumFinal.innerHTML = fullRankHtml;
+
+    // 4. Счетчик ответов на экране вопроса
+    const ansCountDisplay = document.getElementById('ans-count');
+    const answersReceived = allPlayers.filter(([_, d]) => d.lastChoice !== undefined && d.lastChoice >= 0).length;
+    if (ansCountDisplay) ansCountDisplay.innerText = answersReceived;
 });
 
-// ============================================================
-// 7. ЭФФЕКТЫ И МОДАЛКИ
-// ============================================================
+// ==========================================
+// 7. ДОПОЛНИТЕЛЬНЫЕ ЭФФЕКТЫ И МОДАЛКА
+// ==========================================
 
 function createConfetti() {
-    for (let i = 0; i < 80; i++) {
+    for (let i = 0; i < 100; i++) {
         const c = document.createElement('div');
         c.className = 'confetti';
         c.style.left = Math.random() * 100 + 'vw';
         c.style.backgroundColor = ['#ff3366','#2de2e2','#f8e71c','#7ed321','#ffffff'][Math.floor(Math.random()*5)];
+        c.style.width = Math.random() * 12 + 6 + 'px';
+        c.style.height = c.style.width;
         document.body.appendChild(c);
-        c.animate([{ top: '-10%', transform: 'rotate(0deg)' }, { top: '110%', transform: 'rotate(720deg)' }], { duration: 2500 + Math.random() * 2000, iterations: Infinity });
+        
+        c.animate([
+            { top: '-10%', transform: 'rotate(0deg)' },
+            { top: '110%', transform: 'rotate(' + (Math.random() * 720 + 360) + 'deg)' }
+        ], { 
+            duration: 2500 + Math.random() * 3000, 
+            iterations: Infinity 
+        });
     }
 }
 
 function showDonation() {
     const modal = document.getElementById('bread-modal');
-    if(modal) modal.style.display = 'flex';
+    if (modal) modal.style.display = 'flex';
 }
 
-// ПРИНУДИТЕЛЬНЫЙ ЗАПУСК АВТО-ВХОДА ПРИ ЗАГРУЗКЕ
-User.autoJoin();
+// Восстановление имени при случайной перезагрузке
+if (state.myNick && state.myNick !== "undefined") {
+    User.renderIdentity();
+}
 
-window.User = User; window.Admin = Admin;
+// Экспорт для доступа из HTML
+window.User = User; 
+window.Admin = Admin;
