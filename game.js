@@ -231,7 +231,7 @@ const User = {
 const Admin = {
     login() {
         const pinVal = document.getElementById('pin') ? document.getElementById('pin').value : "";
-        if (pinVal === "God is one") {
+        if (pinVal === "123") {
             document.getElementById('auth-lock').style.display = 'none';
             document.getElementById('adm-tools').style.display = 'flex';
         }
